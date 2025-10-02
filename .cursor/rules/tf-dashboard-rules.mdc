@@ -1,0 +1,53 @@
+---
+description: |
+  Project rules and guidelines for the Vuexy MUI Next.js Admin Template.
+  These rules help maintain consistency across the codebase.
+globs:
+  - "src/**"
+  - "package.json"
+  - ".cursor/**"
+alwaysApply: true
+---
+
+# Dashboard Rules for `vuexy-mui-nextjs-admin-template`
+
+## 1. Framework & Libraries
+- **Framework:** Next.js 15 with React 18.  
+- **UI Library:** MUI (Material UI v6) with Emotion for styling.  
+- **Utility CSS:** TailwindCSS is available for layout utilities.  
+- **Icons:** Iconify (custom build step generates CSS from icons).  
+
+## 2. Project Structure
+- `src/@core/theme/` → Centralized theme files (colors, shadows, spacing, typography).  
+- `src/configs/` → App-level configs (e.g., `primaryColorConfig.js`).  
+- `src/components/` → Reusable components.  
+- `src/layouts/` → Layout-related logic.  
+- `src/assets/` → Static assets (images, icons).  
+
+## 3. Styling Rules
+- Prefer **MUI theme tokens** for colors, typography, and spacing.  
+- Use **Tailwind classes** only for small layout utilities (flex, grid, spacing).  
+- Do not hardcode hex colors; update them in:  
+  - `src/@core/theme/colorSchemes.js`  
+  - `src/configs/primaryColorConfig.js`  
+
+## 4. Theme & Color Palette
+- When updating brand colors:  
+  1. Update both theme and config files.  
+  2. Keep old values as comments for reference.  
+  3. Ensure no inline hex codes are left in components.  
+- Tailwind config maps to CSS variables, so use theme variables instead of hardcoding.  
+
+## 5. Icons
+- Icons are managed via **Iconify**.  
+- If adding new icons, place them under `src/assets/iconify-icons/` and regenerate the bundle (handled by the existing process).  
+
+## 6. Linting & Formatting
+- ESLint and Prettier are configured.  
+- Follow project formatting rules — run formatting/linting before commits.  
+
+## 7. Best Practices
+- Do not commit `.env` files; use `.env.example` for placeholders.  
+- Keep UI consistency by centralizing design tokens in theme files.  
+- For new components, check existing theme overrides before creating custom styles.  
+- Do not run terminal commands
