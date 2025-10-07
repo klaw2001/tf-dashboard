@@ -2,7 +2,9 @@
 import { VerticalNavProvider } from '@menu/contexts/verticalNavContext'
 import { SettingsProvider } from '@core/contexts/settingsContext'
 import { AuthProvider } from '../contexts/AuthContext'
+import { HomeProvider } from '../contexts/HomeContext'
 import { TalentProvider } from '../contexts/TalentContext'
+import { RecruiterProvider } from '../contexts/RecruiterContext'
 import ThemeProvider from '@components/theme'
 
 // Util Imports
@@ -21,11 +23,15 @@ const Providers = async props => {
     <VerticalNavProvider>
       <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
         <AuthProvider>
-          <TalentProvider>
-            <ThemeProvider direction={direction} systemMode={systemMode}>
-              {children}
-            </ThemeProvider>
-          </TalentProvider>
+          <HomeProvider>
+            <TalentProvider>
+              <RecruiterProvider>
+                <ThemeProvider direction={direction} systemMode={systemMode}>
+                  {children}
+                </ThemeProvider>
+              </RecruiterProvider>
+            </TalentProvider>
+          </HomeProvider>
         </AuthProvider>
       </SettingsProvider>
     </VerticalNavProvider>

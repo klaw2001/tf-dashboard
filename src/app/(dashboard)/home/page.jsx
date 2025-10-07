@@ -8,15 +8,20 @@ import { Typography, Box, Card, CardContent } from '@mui/material'
 
 // Component Imports
 import ProfileCompletionModal from '@/components/ProfileCompletionModal'
+import TalentAnalyticsCard from '@/components/TalentAnalyticsCard'
 
 // Context Imports
 import { useTalent } from '@/contexts/TalentContext'
+import { useHome } from '@/contexts/HomeContext'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function HomePage() {
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profilePercentageData, setProfilePercentageData] = useState(null)
 
   const { profilePercentage, fetchProfilePercentage, profile } = useTalent()
+  const { userRole } = useHome()
+  const { user } = useAuth()
 
   // Check if profile completion modal should be shown
   useEffect(() => {
@@ -56,12 +61,14 @@ export default function HomePage() {
   return (
     <>
       <Box sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Welcome to Dashboard
-        </Typography>
-        <Typography variant="body1" color="text.secondary" paragraph>
-          You have successfully logged in! This is your main dashboard.
-        </Typography>
+        {/* Title & intro removed as requested */}
+
+        {/* Talent-only analytics card */}
+        {userRole === 'talent' && (
+          <Box sx={{ mt: 3 }}>
+            <TalentAnalyticsCard />
+          </Box>
+        )}
 
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3, mt: 3 }}>
           <Card>

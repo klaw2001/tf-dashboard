@@ -76,13 +76,24 @@ const ProfilePortfolio = ({ data }) => {
         <Box className="space-y-6">
             {/* Header */}
             <Box className="flex justify-between items-center">
-                <Typography variant="h5" className="font-bold text-gray-900">
+                <Typography
+                    variant="h5"
+                    sx={{
+                        fontWeight: 'bold',
+                        color: 'var(--mui-palette-text-primary)'
+                    }}
+                >
                     Portfolio & Media
                 </Typography>
                 <Button
                     variant="contained"
                     startIcon={<i className="tabler-upload" />}
-                    className="bg-primary-main hover:bg-primary-dark"
+                    sx={{
+                        backgroundColor: 'var(--mui-palette-primary-main)',
+                        '&:hover': {
+                            backgroundColor: 'var(--mui-palette-primary-dark)'
+                        }
+                    }}
                 >
                     Upload Media
                 </Button>
@@ -91,7 +102,14 @@ const ProfilePortfolio = ({ data }) => {
             {/* Portfolio Media */}
             <Card>
                 <CardContent className="p-6">
-                    <Typography variant="h6" className="font-semibold text-gray-900 mb-4">
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: 600,
+                            color: 'var(--mui-palette-text-primary)',
+                            mb: 2
+                        }}
+                    >
                         Portfolio & Media
                     </Typography>
 
@@ -117,7 +135,7 @@ const ProfilePortfolio = ({ data }) => {
                                                 <Button
                                                     size="small"
                                                     variant="contained"
-                                                    startIcon={<tablerDownload size={16} />}
+                                                    startIcon={<i className="tabler-download" />}
                                                     className="mt-3 bg-white text-gray-900 hover:bg-gray-100"
                                                 >
                                                     Download
@@ -135,7 +153,14 @@ const ProfilePortfolio = ({ data }) => {
             {/* External Links */}
             <Card>
                 <CardContent className="p-6">
-                    <Typography variant="h6" className="font-semibold text-gray-900 mb-4">
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: 600,
+                            color: 'var(--mui-palette-text-primary)',
+                            mb: 2
+                        }}
+                    >
                         External Links
                     </Typography>
 
@@ -143,17 +168,40 @@ const ProfilePortfolio = ({ data }) => {
                         {portfolio.externalLinks.map((link) => (
                             <Box
                                 key={link.id}
-                                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    p: 1.5,
+                                    border: '1px solid',
+                                    borderColor: 'var(--mui-palette-divider)',
+                                    borderRadius: 2,
+                                    '&:hover': {
+                                        backgroundColor: 'var(--mui-palette-action-hover)'
+                                    },
+                                    transition: 'background-color 0.2s'
+                                }}
                             >
                                 <Box className="flex items-center gap-3">
-                                    <Box className="text-gray-600">
+                                    <Box sx={{ color: 'var(--mui-palette-text-secondary)' }}>
                                         {getIconComponent(link.icon)}
                                     </Box>
                                     <Box>
-                                        <Typography variant="subtitle1" className="font-medium text-gray-900">
+                                        <Typography
+                                            variant="subtitle1"
+                                            sx={{
+                                                fontWeight: 500,
+                                                color: 'var(--mui-palette-text-primary)'
+                                            }}
+                                        >
                                             {link.title}
                                         </Typography>
-                                        <Typography variant="body2" className="text-gray-500">
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: 'var(--mui-palette-text-secondary)'
+                                            }}
+                                        >
                                             {link.url}
                                         </Typography>
                                     </Box>
@@ -162,14 +210,26 @@ const ProfilePortfolio = ({ data }) => {
                                     <IconButton
                                         size="small"
                                         onClick={() => window.open(link.url, '_blank')}
-                                        className="text-gray-400 hover:text-primary-main"
+                                        sx={{
+                                            color: 'var(--mui-palette-text-disabled)',
+                                            '&:hover': {
+                                                color: 'var(--mui-palette-primary-main)',
+                                                backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                            }
+                                        }}
                                     >
                                         <i className="tabler-external-link" />
                                     </IconButton>
                                     <IconButton
                                         size="small"
                                         onClick={() => handleDeleteLink(link.id)}
-                                        className="text-gray-400 hover:text-red-600"
+                                        sx={{
+                                            color: 'var(--mui-palette-text-disabled)',
+                                            '&:hover': {
+                                                color: 'var(--mui-palette-error-main)',
+                                                backgroundColor: 'var(--mui-palette-error-lightOpacity)'
+                                            }
+                                        }}
                                     >
                                         <i className="tabler-trash" />
                                     </IconButton>
@@ -179,12 +239,34 @@ const ProfilePortfolio = ({ data }) => {
 
                         {/* Add External Link Button */}
                         <Box
-                            className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-main hover:bg-primary-main/5 transition-colors duration-200"
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                p: 2,
+                                border: '2px dashed',
+                                borderColor: 'var(--mui-palette-divider)',
+                                borderRadius: 2,
+                                cursor: 'pointer',
+                                '&:hover': {
+                                    borderColor: 'var(--mui-palette-primary-main)',
+                                    backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                },
+                                transition: 'all 0.2s'
+                            }}
                             onClick={() => setAddLinkOpen(true)}
                         >
-                            <Box className="text-center">
-                                <i className="tabler-plus text-gray-400 text-xl mx-auto mb-2" />
-                                <Typography variant="body2" className="text-gray-500">
+                            <Box sx={{ textAlign: 'center' }}>
+                                <i
+                                    className="tabler-plus text-xl mx-auto mb-2"
+                                    style={{ color: 'var(--mui-palette-text-disabled)' }}
+                                />
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'var(--mui-palette-text-secondary)'
+                                    }}
+                                >
                                     + Add External Link
                                 </Typography>
                             </Box>
@@ -197,14 +279,42 @@ const ProfilePortfolio = ({ data }) => {
             <Card>
                 <CardContent className="p-6">
                     <Box
-                        className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-main hover:bg-primary-main/5 transition-colors duration-200"
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            p: 4,
+                            border: '2px dashed',
+                            borderColor: 'var(--mui-palette-divider)',
+                            borderRadius: 2,
+                            cursor: 'pointer',
+                            '&:hover': {
+                                borderColor: 'var(--mui-palette-primary-main)',
+                                backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                            },
+                            transition: 'all 0.2s'
+                        }}
                     >
-                        <Box className="text-center">
-                            <i className="tabler-upload text-gray-400 text-4xl mx-auto mb-4" />
-                            <Typography variant="h6" className="text-gray-600 mb-2">
+                        <Box sx={{ textAlign: 'center' }}>
+                            <i
+                                className="tabler-upload text-4xl mx-auto mb-4"
+                                style={{ color: 'var(--mui-palette-text-disabled)' }}
+                            />
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    color: 'var(--mui-palette-text-secondary)',
+                                    mb: 1
+                                }}
+                            >
                                 Upload Files
                             </Typography>
-                            <Typography variant="body2" className="text-gray-500">
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'var(--mui-palette-text-disabled)'
+                                }}
+                            >
                                 Images, PDFs, Videos
                             </Typography>
                         </Box>
@@ -253,7 +363,15 @@ const ProfilePortfolio = ({ data }) => {
                                         label={iconOption.label}
                                         onClick={() => setNewLink({ ...newLink, icon: iconOption.name })}
                                         variant={newLink.icon === iconOption.name ? 'filled' : 'outlined'}
-                                        className={newLink.icon === iconOption.name ? 'bg-primary-main text-white' : ''}
+                                        sx={{
+                                            ...(newLink.icon === iconOption.name && {
+                                                backgroundColor: 'var(--mui-palette-primary-main)',
+                                                color: 'white',
+                                                '&:hover': {
+                                                    backgroundColor: 'var(--mui-palette-primary-dark)'
+                                                }
+                                            })
+                                        }}
                                     />
                                 ))}
                             </Box>
@@ -265,7 +383,12 @@ const ProfilePortfolio = ({ data }) => {
                     <Button
                         variant="contained"
                         onClick={handleAddLink}
-                        className="bg-primary-main hover:bg-primary-dark"
+                        sx={{
+                            backgroundColor: 'var(--mui-palette-primary-main)',
+                            '&:hover': {
+                                backgroundColor: 'var(--mui-palette-primary-dark)'
+                            }
+                        }}
                     >
                         Add Link
                     </Button>

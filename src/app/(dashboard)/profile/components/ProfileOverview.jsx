@@ -408,13 +408,32 @@ const ProfileOverview = ({ data }) => {
 
                             {/* Basic Info */}
                             <Box className="text-center md:text-left">
-                                <Typography variant="h4" className="font-bold text-gray-900 mb-2">
+                                <Typography
+                                    variant="h4"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        color: 'var(--mui-palette-text-primary)',
+                                        mb: 1
+                                    }}
+                                >
                                     {data.user.name}
                                 </Typography>
-                                <Typography variant="h6" className="text-gray-600 mb-2">
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        color: 'var(--mui-palette-text-secondary)',
+                                        mb: 1
+                                    }}
+                                >
                                     {data.user.title}
                                 </Typography>
-                                <Typography variant="body1" className="text-gray-500 mb-4">
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        color: 'var(--mui-palette-text-disabled)',
+                                        mb: 2
+                                    }}
+                                >
                                     {data.user.location} • {data.user.experience}
                                 </Typography>
 
@@ -452,23 +471,37 @@ const ProfileOverview = ({ data }) => {
 
                         {/* Profile Completeness */}
                         <Box className="ml-auto">
-                            <Box className="text-right mb-2">
-                                <Typography variant="body2" className="text-gray-600">
+                            <Box sx={{ textAlign: 'right', mb: 1 }}>
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'var(--mui-palette-text-secondary)'
+                                    }}
+                                >
                                     Profile Completeness
                                 </Typography>
-                                <Typography variant="h6" className="font-semibold text-gray-900">
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 600,
+                                        color: 'var(--mui-palette-text-primary)'
+                                    }}
+                                >
                                     {profilePercentage}%
                                 </Typography>
                             </Box>
                             <LinearProgress
                                 variant="determinate"
                                 value={profilePercentage}
-                                className="w-32 h-2 rounded-full"
                                 sx={{
+                                    width: 128,
+                                    height: 8,
+                                    borderRadius: 4,
                                     '& .MuiLinearProgress-bar': {
-                                        backgroundColor: 'primary.main'
+                                        backgroundColor: 'var(--mui-palette-primary-main)',
+                                        borderRadius: 4
                                     },
-                                    backgroundColor: 'gray.200'
+                                    backgroundColor: 'var(--mui-palette-action-disabledBackground)'
                                 }}
                             />
                         </Box>
@@ -480,7 +513,13 @@ const ProfileOverview = ({ data }) => {
             <Card>
                 <CardContent className="p-6">
                     <Box className="flex justify-between items-center mb-4">
-                        <Typography variant="h6" className="font-semibold text-gray-900">
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 600,
+                                color: 'var(--mui-palette-text-primary)'
+                            }}
+                        >
                             About Me
                         </Typography>
                         <Button
@@ -488,7 +527,13 @@ const ProfileOverview = ({ data }) => {
                             size="small"
                             startIcon={<i className="tabler-edit" />}
                             onClick={() => setEditAbout(true)}
-                            className="text-primary-main hover:text-primary-dark"
+                            sx={{
+                                color: 'var(--mui-palette-primary-main)',
+                                '&:hover': {
+                                    color: 'var(--mui-palette-primary-dark)',
+                                    backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                }
+                            }}
                         >
                             Edit
                         </Button>
@@ -505,7 +550,13 @@ const ProfileOverview = ({ data }) => {
                             className="mb-4"
                         />
                     ) : (
-                        <Typography variant="body1" className="text-gray-700 leading-relaxed">
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                color: 'var(--mui-palette-text-primary)',
+                                lineHeight: 1.6
+                            }}
+                        >
                             {aboutContent}
                         </Typography>
                     )}
@@ -516,7 +567,12 @@ const ProfileOverview = ({ data }) => {
                                 variant="contained"
                                 size="small"
                                 onClick={handleSaveAbout}
-                                className="bg-primary-main hover:bg-primary-dark"
+                                sx={{
+                                    backgroundColor: 'var(--mui-palette-primary-main)',
+                                    '&:hover': {
+                                        backgroundColor: 'var(--mui-palette-primary-dark)'
+                                    }
+                                }}
                             >
                                 Save
                             </Button>
@@ -540,7 +596,13 @@ const ProfileOverview = ({ data }) => {
                 <CardContent className="p-6">
                     <Box className="flex justify-between items-center mb-4">
                         <Box className="flex items-center gap-2">
-                            <Typography variant="h6" className="font-semibold text-gray-900">
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 600,
+                                    color: 'var(--mui-palette-text-primary)'
+                                }}
+                            >
                                 Professional Summary
                             </Typography>
                             {data.professionalSummary.isAIOptimized && (
@@ -548,7 +610,12 @@ const ProfileOverview = ({ data }) => {
                                     icon={<i className="tabler-sparkles" />}
                                     label="AI-Optimized"
                                     size="small"
-                                    className="bg-purple-100 text-purple-700 border-purple-200"
+                                    sx={{
+                                        backgroundColor: 'var(--mui-palette-primary-lightOpacity)',
+                                        color: 'var(--mui-palette-primary-dark)',
+                                        border: '1px solid',
+                                        borderColor: 'var(--mui-palette-primary-light)'
+                                    }}
                                 />
                             )}
                         </Box>
@@ -557,7 +624,13 @@ const ProfileOverview = ({ data }) => {
                                 variant="text"
                                 size="small"
                                 startIcon={<i className="tabler-sparkles" />}
-                                className="text-purple-600 hover:text-purple-700"
+                                sx={{
+                                    color: 'var(--mui-palette-primary-main)',
+                                    '&:hover': {
+                                        color: 'var(--mui-palette-primary-dark)',
+                                        backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                    }
+                                }}
                                 onClick={() => {
                                     setShowAiPrompt(!showAiPrompt)
                                     setAiPrompt('')
@@ -571,7 +644,13 @@ const ProfileOverview = ({ data }) => {
                                 variant="text"
                                 size="small"
                                 startIcon={<i className="tabler-edit" />}
-                                className="text-primary-main hover:text-primary-dark"
+                                sx={{
+                                    color: 'var(--mui-palette-primary-main)',
+                                    '&:hover': {
+                                        color: 'var(--mui-palette-primary-dark)',
+                                        backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                    }
+                                }}
                                 onClick={() => setEditSummary(true)}
                             >
                                 Edit
@@ -581,7 +660,14 @@ const ProfileOverview = ({ data }) => {
 
                     {/* AI Optimization Input - Only visible when toggled */}
                     {showAiPrompt && !editSummary && (
-                        <Box className="mb-4 p-4 bg-gray-50 rounded-lg">
+                        <Box
+                            sx={{
+                                mb: 2,
+                                p: 2,
+                                backgroundColor: 'var(--mui-palette-action-hover)',
+                                borderRadius: 2
+                            }}
+                        >
                             <TextField
                                 fullWidth
                                 multiline
@@ -600,7 +686,12 @@ const ProfileOverview = ({ data }) => {
                                     startIcon={loading.aiGeneration ? <CircularProgress size={16} color="inherit" /> : <i className="tabler-sparkles" />}
                                     onClick={handleGenerateSummary}
                                     disabled={!aiPrompt.trim() || loading.aiGeneration}
-                                    className="bg-purple-600 hover:bg-purple-700"
+                                    sx={{
+                                        backgroundColor: 'var(--mui-palette-primary-main)',
+                                        '&:hover': {
+                                            backgroundColor: 'var(--mui-palette-primary-dark)'
+                                        }
+                                    }}
                                 >
                                     {loading.aiGeneration ? 'Generating...' : 'Optimize with AI'}
                                 </Button>
@@ -629,15 +720,35 @@ const ProfileOverview = ({ data }) => {
                         />
                     ) : (
                         <Box className="relative">
-                            <Typography variant="body1" className="text-gray-700">
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    color: 'var(--mui-palette-text-primary)'
+                                }}
+                            >
                                 {summaryContent}
                             </Typography>
                             {/* Loading overlay for the summary block */}
                             {loading.aiGeneration && (
-                                <Box className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        backgroundColor: 'rgba(var(--mui-palette-background-paperChannel) / 0.75)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: 2
+                                    }}
+                                >
                                     <Box className="flex items-center gap-2">
                                         <CircularProgress size={20} />
-                                        <Typography variant="body2" className="text-gray-600">
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: 'var(--mui-palette-text-secondary)'
+                                            }}
+                                        >
                                             Generating AI-optimized summary...
                                         </Typography>
                                     </Box>
@@ -653,7 +764,12 @@ const ProfileOverview = ({ data }) => {
                                 variant="contained"
                                 size="small"
                                 onClick={handleSaveSummary}
-                                className="bg-primary-main hover:bg-primary-dark"
+                                sx={{
+                                    backgroundColor: 'var(--mui-palette-primary-main)',
+                                    '&:hover': {
+                                        backgroundColor: 'var(--mui-palette-primary-dark)'
+                                    }
+                                }}
                             >
                                 Save
                             </Button>
@@ -676,11 +792,32 @@ const ProfileOverview = ({ data }) => {
 
                     {/* Generated Summary Actions - Only show when there's generated text */}
                     {showGeneratedSummary && aiGeneratedText && !editSummary && !loading.aiGeneration && (
-                        <Box className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                            <Typography variant="subtitle2" className="text-green-800 mb-2">
+                        <Box
+                            sx={{
+                                mt: 2,
+                                p: 2,
+                                backgroundColor: 'var(--mui-palette-success-lightOpacity)',
+                                borderRadius: 2,
+                                border: '1px solid',
+                                borderColor: 'var(--mui-palette-success-light)'
+                            }}
+                        >
+                            <Typography
+                                variant="subtitle2"
+                                sx={{
+                                    color: 'var(--mui-palette-success-dark)',
+                                    mb: 1
+                                }}
+                            >
                                 AI-Generated Summary:
                             </Typography>
-                            <Typography variant="body2" className="text-green-700 mb-3">
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'var(--mui-palette-success-dark)',
+                                    mb: 2
+                                }}
+                            >
                                 {aiGeneratedText}
                             </Typography>
                             <Box className="flex gap-2">
@@ -689,7 +826,12 @@ const ProfileOverview = ({ data }) => {
                                     size="small"
                                     onClick={handleSaveAiSummary}
                                     disabled={loading.profile}
-                                    className="bg-green-600 hover:bg-green-700"
+                                    sx={{
+                                        backgroundColor: 'var(--mui-palette-success-main)',
+                                        '&:hover': {
+                                            backgroundColor: 'var(--mui-palette-success-dark)'
+                                        }
+                                    }}
                                 >
                                     Save
                                 </Button>
@@ -698,7 +840,13 @@ const ProfileOverview = ({ data }) => {
                                     size="small"
                                     onClick={handleCancelAiSummary}
                                     disabled={loading.profile}
-                                    className="border-green-600 text-green-600 hover:bg-green-50"
+                                    sx={{
+                                        borderColor: 'var(--mui-palette-success-main)',
+                                        color: 'var(--mui-palette-success-main)',
+                                        '&:hover': {
+                                            backgroundColor: 'var(--mui-palette-success-lightOpacity)'
+                                        }
+                                    }}
                                 >
                                     Cancel
                                 </Button>
@@ -712,7 +860,13 @@ const ProfileOverview = ({ data }) => {
             <Card>
                 <CardContent className="p-6">
                     <Box className="flex justify-between items-center mb-4">
-                        <Typography variant="h6" className="font-semibold text-gray-900">
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 600,
+                                color: 'var(--mui-palette-text-primary)'
+                            }}
+                        >
                             Featured Skills
                         </Typography>
                         <Button
@@ -720,7 +874,12 @@ const ProfileOverview = ({ data }) => {
                             size="small"
                             startIcon={<i className="tabler-plus" />}
                             onClick={handleAddSkill}
-                            className="bg-primary-main hover:bg-primary-dark"
+                            sx={{
+                                backgroundColor: 'var(--mui-palette-primary-main)',
+                                '&:hover': {
+                                    backgroundColor: 'var(--mui-palette-primary-dark)'
+                                }
+                            }}
                         >
                             Add Skill
                         </Button>
@@ -728,7 +887,14 @@ const ProfileOverview = ({ data }) => {
 
                     {/* Add Skill Input - Only visible when adding */}
                     {showAddSkill && (
-                        <Box className="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <Box
+                            sx={{
+                                mb: 3,
+                                p: 2,
+                                backgroundColor: 'var(--mui-palette-action-hover)',
+                                borderRadius: 2
+                            }}
+                        >
                             <TextField
                                 fullWidth
                                 placeholder="Enter skill name (e.g., React, Python, Project Management...)"
@@ -750,7 +916,12 @@ const ProfileOverview = ({ data }) => {
                                     startIcon={<i className="tabler-plus" />}
                                     onClick={handleAddSkillToList}
                                     disabled={!newSkill.trim()}
-                                    className="bg-primary-main hover:bg-primary-dark"
+                                    sx={{
+                                        backgroundColor: 'var(--mui-palette-primary-main)',
+                                        '&:hover': {
+                                            backgroundColor: 'var(--mui-palette-primary-dark)'
+                                        }
+                                    }}
                                 >
                                     Add to List
                                 </Button>
@@ -772,14 +943,36 @@ const ProfileOverview = ({ data }) => {
                     {localSkills.length > 0 ? (
                         <Box className="space-y-3 mb-6">
                             {localSkills.map((skill, index) => (
-                                <Box key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <Typography variant="body1" className="text-gray-800 font-medium">
+                                <Box
+                                    key={index}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        p: 1.5,
+                                        backgroundColor: 'var(--mui-palette-action-hover)',
+                                        borderRadius: 2
+                                    }}
+                                >
+                                    <Typography
+                                        variant="body1"
+                                        sx={{
+                                            color: 'var(--mui-palette-text-primary)',
+                                            fontWeight: 500
+                                        }}
+                                    >
                                         {typeof skill === 'string' ? skill : skill.ts_skill}
                                     </Typography>
                                     <IconButton
                                         size="small"
                                         onClick={() => handleRemoveSkill(index)}
-                                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        sx={{
+                                            color: 'var(--mui-palette-error-main)',
+                                            '&:hover': {
+                                                color: 'var(--mui-palette-error-dark)',
+                                                backgroundColor: 'var(--mui-palette-error-lightOpacity)'
+                                            }
+                                        }}
                                     >
                                         <i className="tabler-x" />
                                     </IconButton>
@@ -787,23 +980,59 @@ const ProfileOverview = ({ data }) => {
                             ))}
                         </Box>
                     ) : (
-                        <Box className="text-center py-8 text-gray-500">
-                            <i className="tabler-skills text-4xl mb-2" />
-                            <Typography variant="body1">No skills added yet</Typography>
-                            <Typography variant="body2">Click "Add Skill" to get started</Typography>
+                        <Box
+                            sx={{
+                                textAlign: 'center',
+                                py: 4,
+                                color: 'var(--mui-palette-text-disabled)'
+                            }}
+                        >
+                            <i
+                                className="tabler-skills text-4xl mb-2"
+                                style={{ color: 'var(--mui-palette-text-disabled)' }}
+                            />
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    color: 'var(--mui-palette-text-disabled)'
+                                }}
+                            >
+                                No skills added yet
+                            </Typography>
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'var(--mui-palette-text-disabled)'
+                                }}
+                            >
+                                Click "Add Skill" to get started
+                            </Typography>
                         </Box>
                     )}
 
                     {/* Save/Cancel Actions - Only show when there are changes */}
                     {hasUnsavedChanges && (
-                        <Box className="flex gap-2 pt-4 border-t border-gray-200">
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                gap: 1,
+                                pt: 2,
+                                borderTop: '1px solid',
+                                borderColor: 'var(--mui-palette-divider)'
+                            }}
+                        >
                             <Button
                                 variant="contained"
                                 size="small"
                                 startIcon={loading.profile ? <CircularProgress size={16} color="inherit" /> : <i className="tabler-device-floppy" />}
                                 onClick={handleSaveAllSkills}
                                 disabled={loading.profile || localSkills.length === 0}
-                                className="bg-green-600 hover:bg-green-700"
+                                sx={{
+                                    backgroundColor: 'var(--mui-palette-success-main)',
+                                    '&:hover': {
+                                        backgroundColor: 'var(--mui-palette-success-dark)'
+                                    }
+                                }}
                             >
                                 {loading.profile ? 'Saving...' : 'Save All Skills'}
                             </Button>
@@ -833,7 +1062,12 @@ const ProfileOverview = ({ data }) => {
                                     src={imagePreview}
                                     sx={{ width: 150, height: 150, mx: 'auto', mb: 2 }}
                                 />
-                                <Typography variant="body2" className="text-gray-600">
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'var(--mui-palette-text-secondary)'
+                                    }}
+                                >
                                     Preview of your new profile picture
                                 </Typography>
                             </Box>
@@ -844,7 +1078,12 @@ const ProfileOverview = ({ data }) => {
                                 >
                                     {getInitials(data.user.name)}
                                 </Avatar>
-                                <Typography variant="body2" className="text-gray-600">
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'var(--mui-palette-text-secondary)'
+                                    }}
+                                >
                                     Current profile picture
                                 </Typography>
                             </Box>

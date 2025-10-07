@@ -26,6 +26,9 @@ import {
 // Context Imports
 import { useTalent } from '@/contexts/TalentContext'
 
+// Component Imports
+import ProjectImageUpload from '@/components/ProjectImageUpload'
+
 // Icon Imports - Using Iconify CSS classes
 
 const ProfileProjects = ({ data }) => {
@@ -33,6 +36,7 @@ const ProfileProjects = ({ data }) => {
     const [addProjectOpen, setAddProjectOpen] = useState(false)
     const [editProjectOpen, setEditProjectOpen] = useState(false)
     const [editingProject, setEditingProject] = useState(null)
+    const [editingProjectImages, setEditingProjectImages] = useState(['', '', '', ''])
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
     const [newProject, setNewProject] = useState({
         tpj_name: '',
@@ -43,6 +47,25 @@ const ProfileProjects = ({ data }) => {
         tpj_url: '',
         tpj_github_url: '',
         tpj_images: ''
+    })
+    const [newProjectImages, setNewProjectImages] = useState(['', '', '', ''])
+
+    // Custom close function for add project modal
+    const closeAddProjectModal = () => {
+        console.log('Explicitly closing add project modal') // Debug log
+        setAddProjectOpen(false)
+    }
+
+    // External Links state
+    const [externalLinks, setExternalLinks] = useState([
+        { id: 1, title: 'Personal Website', url: 'https://sarahmitchell.dev', icon: 'tabler-world' },
+        { id: 2, title: 'GitHub Portfolio', url: 'https://github.com/saraharchitect', icon: 'tabler-brand-github' }
+    ])
+    const [addLinkOpen, setAddLinkOpen] = useState(false)
+    const [newLink, setNewLink] = useState({
+        title: '',
+        url: '',
+        icon: 'tabler-world'
     })
 
     // Use Talent context
@@ -57,7 +80,15 @@ const ProfileProjects = ({ data }) => {
 
     const handleAddProject = async () => {
         try {
-            const result = await saveProject(newProject)
+            // Filter out empty image paths and join with commas
+            const imagePaths = newProjectImages.filter(path => path.trim() !== '').join(',')
+
+            const projectData = {
+                ...newProject,
+                tpj_images: imagePaths
+            }
+
+            const result = await saveProject(projectData)
 
             if (result.success) {
                 setSnackbar({ open: true, message: 'Project added successfully', severity: 'success' })
@@ -71,12 +102,16 @@ const ProfileProjects = ({ data }) => {
                     tpj_github_url: '',
                     tpj_images: ''
                 })
-                setAddProjectOpen(false)
+                setNewProjectImages(['', '', '', ''])
+                // Only close modal on successful project save
+                closeAddProjectModal()
             } else {
                 setSnackbar({ open: true, message: result.error || 'Failed to add project', severity: 'error' })
+                // Keep modal open on error
             }
         } catch (error) {
             setSnackbar({ open: true, message: 'Failed to add project', severity: 'error' })
+            // Keep modal open on error
         }
     }
 
@@ -92,6 +127,12 @@ const ProfileProjects = ({ data }) => {
             tpj_github_url: project.tpj_github_url || '',
             tpj_images: project.tpj_images || ''
         })
+
+        // Parse existing images into array
+        const existingImages = project.tpj_images ? project.tpj_images.split(',') : []
+        const imageArray = [...existingImages, ...Array(4 - existingImages.length).fill('')]
+        setEditingProjectImages(imageArray)
+
         setEditProjectOpen(true)
     }
 
@@ -119,12 +160,21 @@ const ProfileProjects = ({ data }) => {
 
     const handleSaveEdit = async () => {
         try {
-            const result = await saveProject(editingProject)
+            // Filter out empty image paths and join with commas
+            const imagePaths = editingProjectImages.filter(path => path.trim() !== '').join(',')
+
+            const projectData = {
+                ...editingProject,
+                tpj_images: imagePaths
+            }
+
+            const result = await saveProject(projectData)
 
             if (result.success) {
                 setSnackbar({ open: true, message: 'Project updated successfully', severity: 'success' })
                 setEditProjectOpen(false)
                 setEditingProject(null)
+                setEditingProjectImages(['', '', '', ''])
             } else {
                 setSnackbar({ open: true, message: result.error || 'Failed to update project', severity: 'error' })
             }
@@ -137,6 +187,36 @@ const ProfileProjects = ({ data }) => {
         setSnackbar({ ...snackbar, open: false })
     }
 
+    // External Links handlers
+    const handleAddLink = () => {
+        const link = {
+            id: Date.now(),
+            ...newLink
+        }
+        setExternalLinks([...externalLinks, link])
+        setNewLink({
+            title: '',
+            url: '',
+            icon: 'tabler-world'
+        })
+        setAddLinkOpen(false)
+    }
+
+    const handleDeleteLink = (linkId) => {
+        setExternalLinks(externalLinks.filter(l => l.id !== linkId))
+    }
+
+    const getIconComponent = (iconName) => {
+        return <i className={iconName} />
+    }
+
+    // Helper function to construct full image URL
+    const getImageUrl = (imagePath) => {
+        if (!imagePath) return null
+        const uploadUrl = process.env.NEXT_PUBLIC_UPLOAD_URL
+        return `${uploadUrl}${imagePath}`
+    }
+
     // Transform API data to display format
     const getDisplayData = (project) => {
         return {
@@ -146,6 +226,7 @@ const ProfileProjects = ({ data }) => {
             duration: project.tpj_duration || 'Data not available',
             impact: project.tpj_impact || 'Data not available',
             technologies: project.tpj_technologies ? project.tpj_technologies.split(',').map(t => t.trim()) : [],
+            images: project.tpj_images ? project.tpj_images.split(',').filter(img => img.trim() !== '') : [],
             links: {
                 github: project.tpj_github_url || '',
                 demo: project.tpj_url || '',
@@ -158,14 +239,25 @@ const ProfileProjects = ({ data }) => {
         <Box className="space-y-6">
             {/* Header */}
             <Box className="flex justify-between items-center">
-                <Typography variant="h5" className="font-bold text-gray-900">
-                    Featured Projects
+                <Typography
+                    variant="h5"
+                    sx={{
+                        fontWeight: 'bold',
+                        color: 'var(--mui-palette-text-primary)'
+                    }}
+                >
+                    Portfolio
                 </Typography>
                 <Button
                     variant="contained"
                     startIcon={<i className="tabler-plus" />}
                     onClick={() => setAddProjectOpen(true)}
-                    className="bg-primary-main hover:bg-primary-dark"
+                    sx={{
+                        backgroundColor: 'var(--mui-palette-primary-main)',
+                        '&:hover': {
+                            backgroundColor: 'var(--mui-palette-primary-dark)'
+                        }
+                    }}
                 >
                     Add Project
                 </Button>
@@ -175,11 +267,22 @@ const ProfileProjects = ({ data }) => {
             <Box className="space-y-6">
                 {projects.length === 0 ? (
                     <Card>
-                        <CardContent className="p-6 text-center">
-                            <Typography variant="h6" className="text-gray-500 mb-2">
+                        <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    color: 'var(--mui-palette-text-secondary)',
+                                    mb: 1
+                                }}
+                            >
                                 No projects found
                             </Typography>
-                            <Typography variant="body2" className="text-gray-400">
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'var(--mui-palette-text-disabled)'
+                                }}
+                            >
                                 Add your first project to showcase your work
                             </Typography>
                         </CardContent>
@@ -193,33 +296,77 @@ const ProfileProjects = ({ data }) => {
                                     <Box className="flex gap-6">
                                         {/* Project Content */}
                                         <Box className="flex-1">
-                                            <Typography variant="h6" className="font-semibold text-gray-900 mb-2">
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: 'var(--mui-palette-text-primary)',
+                                                    mb: 1
+                                                }}
+                                            >
                                                 {displayData.title}
                                             </Typography>
 
-                                            <Typography variant="body1" className="text-gray-700 mb-4 leading-relaxed">
+                                            <Typography
+                                                variant="body1"
+                                                sx={{
+                                                    color: 'var(--mui-palette-text-secondary)',
+                                                    mb: 2,
+                                                    lineHeight: 1.6
+                                                }}
+                                            >
                                                 {displayData.description}
                                             </Typography>
 
                                             <Box className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                                 <Box>
-                                                    <Typography variant="body2" className="text-gray-500 mb-1">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-secondary)',
+                                                            mb: 0.5
+                                                        }}
+                                                    >
                                                         Duration
                                                     </Typography>
-                                                    <Typography variant="body2" className="text-gray-900 font-medium">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-primary)',
+                                                            fontWeight: 500
+                                                        }}
+                                                    >
                                                         {displayData.duration}
                                                     </Typography>
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="body2" className="text-gray-500 mb-1">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-secondary)',
+                                                            mb: 0.5
+                                                        }}
+                                                    >
                                                         Impact
                                                     </Typography>
-                                                    <Typography variant="body2" className="text-gray-900 font-medium">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-primary)',
+                                                            fontWeight: 500
+                                                        }}
+                                                    >
                                                         {displayData.impact}
                                                     </Typography>
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="body2" className="text-gray-500 mb-1">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-secondary)',
+                                                            mb: 0.5
+                                                        }}
+                                                    >
                                                         Technologies
                                                     </Typography>
                                                     <Box className="flex flex-wrap gap-1 mt-1">
@@ -229,11 +376,21 @@ const ProfileProjects = ({ data }) => {
                                                                     key={index}
                                                                     label={tech}
                                                                     size="small"
-                                                                    className="bg-blue-100 text-blue-700 border-blue-200"
+                                                                    sx={{
+                                                                        backgroundColor: 'var(--mui-palette-info-lightOpacity)',
+                                                                        color: 'var(--mui-palette-info-dark)',
+                                                                        border: '1px solid',
+                                                                        borderColor: 'var(--mui-palette-info-light)'
+                                                                    }}
                                                                 />
                                                             ))
                                                         ) : (
-                                                            <Typography variant="body2" className="text-gray-400">
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    color: 'var(--mui-palette-text-disabled)'
+                                                                }}
+                                                            >
                                                                 Data not available
                                                             </Typography>
                                                         )}
@@ -248,7 +405,13 @@ const ProfileProjects = ({ data }) => {
                                                         variant="text"
                                                         size="small"
                                                         startIcon={<i className="tabler-brand-github" />}
-                                                        className="text-gray-600 hover:text-primary-main"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-secondary)',
+                                                            '&:hover': {
+                                                                color: 'var(--mui-palette-primary-main)',
+                                                                backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                                            }
+                                                        }}
                                                         onClick={() => window.open(displayData.links.github, '_blank')}
                                                     >
                                                         GitHub
@@ -259,7 +422,13 @@ const ProfileProjects = ({ data }) => {
                                                         variant="text"
                                                         size="small"
                                                         startIcon={<i className="tabler-play" />}
-                                                        className="text-gray-600 hover:text-primary-main"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-secondary)',
+                                                            '&:hover': {
+                                                                color: 'var(--mui-palette-primary-main)',
+                                                                backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                                            }
+                                                        }}
                                                         onClick={() => window.open(displayData.links.demo, '_blank')}
                                                     >
                                                         Demo
@@ -270,7 +439,13 @@ const ProfileProjects = ({ data }) => {
                                                         variant="text"
                                                         size="small"
                                                         startIcon={<i className="tabler-photo" />}
-                                                        className="text-gray-600 hover:text-primary-main"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-secondary)',
+                                                            '&:hover': {
+                                                                color: 'var(--mui-palette-primary-main)',
+                                                                backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                                            }
+                                                        }}
                                                     >
                                                         {displayData.links.images} images
                                                     </Button>
@@ -284,7 +459,13 @@ const ProfileProjects = ({ data }) => {
                                                     size="small"
                                                     startIcon={<i className="tabler-edit" />}
                                                     onClick={() => handleEditProject(project)}
-                                                    className="text-primary-main hover:text-primary-dark"
+                                                    sx={{
+                                                        color: 'var(--mui-palette-primary-main)',
+                                                        '&:hover': {
+                                                            color: 'var(--mui-palette-primary-dark)',
+                                                            backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                                        }
+                                                    }}
                                                 >
                                                     Edit
                                                 </Button>
@@ -293,20 +474,51 @@ const ProfileProjects = ({ data }) => {
                                                     size="small"
                                                     startIcon={<i className="tabler-trash" />}
                                                     onClick={() => handleDeleteProject(project.tpj_id)}
-                                                    className="text-red-600 hover:text-red-700"
+                                                    sx={{
+                                                        color: 'var(--mui-palette-error-main)',
+                                                        '&:hover': {
+                                                            color: 'var(--mui-palette-error-dark)',
+                                                            backgroundColor: 'var(--mui-palette-error-lightOpacity)'
+                                                        }
+                                                    }}
                                                 >
                                                     Delete
                                                 </Button>
                                             </Box>
                                         </Box>
 
-                                        {/* Project Image Placeholder */}
-                                        <Box className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                                            <Tooltip title="Upload Project Image">
-                                                <IconButton className="text-gray-400">
-                                                    <i className="tabler-photo text-2xl" />
-                                                </IconButton>
-                                            </Tooltip>
+                                        {/* Project Images Display */}
+                                        <Box
+                                            sx={{
+                                                width: 128,
+                                                height: 128,
+                                                backgroundColor: 'var(--mui-palette-action-hover)',
+                                                borderRadius: 2,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                border: '1px solid',
+                                                borderColor: 'var(--mui-palette-divider)',
+                                                overflow: 'hidden'
+                                            }}
+                                        >
+                                            {displayData.images.length > 0 ? (
+                                                <img
+                                                    src={getImageUrl(displayData.images[0])}
+                                                    alt={displayData.title}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                            ) : (
+                                                <Tooltip title="No images uploaded">
+                                                    <IconButton
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-disabled)'
+                                                        }}
+                                                    >
+                                                        <i className="tabler-photo text-2xl" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            )}
                                         </Box>
                                     </Box>
                                 </CardContent>
@@ -316,10 +528,157 @@ const ProfileProjects = ({ data }) => {
                 )}
             </Box>
 
+            {/* External Links */}
+            <Card>
+                <CardContent className="p-6">
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: 600,
+                            color: 'var(--mui-palette-text-primary)',
+                            mb: 2
+                        }}
+                    >
+                        External Links
+                    </Typography>
+
+                    <Box className="space-y-3">
+                        {externalLinks.map((link) => (
+                            <Box
+                                key={link.id}
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    p: 1.5,
+                                    border: '1px solid',
+                                    borderColor: 'var(--mui-palette-divider)',
+                                    borderRadius: 2,
+                                    '&:hover': {
+                                        backgroundColor: 'var(--mui-palette-action-hover)'
+                                    },
+                                    transition: 'background-color 0.2s'
+                                }}
+                            >
+                                <Box className="flex items-center gap-3">
+                                    <Box sx={{ color: 'var(--mui-palette-text-secondary)' }}>
+                                        {getIconComponent(link.icon)}
+                                    </Box>
+                                    <Box>
+                                        <Typography
+                                            variant="subtitle1"
+                                            sx={{
+                                                fontWeight: 500,
+                                                color: 'var(--mui-palette-text-primary)'
+                                            }}
+                                        >
+                                            {link.title}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: 'var(--mui-palette-text-secondary)'
+                                            }}
+                                        >
+                                            {link.url}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                                <Box className="flex items-center gap-2">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => window.open(link.url, '_blank')}
+                                        sx={{
+                                            color: 'var(--mui-palette-text-disabled)',
+                                            '&:hover': {
+                                                color: 'var(--mui-palette-primary-main)',
+                                                backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                            }
+                                        }}
+                                    >
+                                        <i className="tabler-external-link" />
+                                    </IconButton>
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => handleDeleteLink(link.id)}
+                                        sx={{
+                                            color: 'var(--mui-palette-text-disabled)',
+                                            '&:hover': {
+                                                color: 'var(--mui-palette-error-main)',
+                                                backgroundColor: 'var(--mui-palette-error-lightOpacity)'
+                                            }
+                                        }}
+                                    >
+                                        <i className="tabler-trash" />
+                                    </IconButton>
+                                </Box>
+                            </Box>
+                        ))}
+
+                        {/* Add External Link Button */}
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                p: 2,
+                                border: '2px dashed',
+                                borderColor: 'var(--mui-palette-divider)',
+                                borderRadius: 2,
+                                cursor: 'pointer',
+                                '&:hover': {
+                                    borderColor: 'var(--mui-palette-primary-main)',
+                                    backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                },
+                                transition: 'all 0.2s'
+                            }}
+                            onClick={() => setAddLinkOpen(true)}
+                        >
+                            <Box sx={{ textAlign: 'center' }}>
+                                <i
+                                    className="tabler-plus text-xl mx-auto mb-2"
+                                    style={{ color: 'var(--mui-palette-text-disabled)' }}
+                                />
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'var(--mui-palette-text-secondary)'
+                                    }}
+                                >
+                                    + Add External Link
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Box>
+                </CardContent>
+            </Card>
+
             {/* Add Project Dialog */}
-            <Dialog open={addProjectOpen} onClose={() => setAddProjectOpen(false)} maxWidth="md" fullWidth>
+            <Dialog
+                open={addProjectOpen}
+                onClose={() => {
+                    console.log('Dialog onClose triggered - preventing close') // Debug log
+                    // Prevent all closing attempts
+                }}
+                maxWidth="md"
+                fullWidth
+                disableEscapeKeyDown
+                disableRestoreFocus
+                keepMounted={false}
+                hideBackdrop={false}
+                sx={{ zIndex: 1300 }}
+                PaperProps={{
+                    onClick: (e) => e.stopPropagation(),
+                    onMouseDown: (e) => e.stopPropagation(),
+                    onMouseUp: (e) => e.stopPropagation()
+                }}
+            >
                 <DialogTitle>Add New Project</DialogTitle>
-                <DialogContent>
+                <DialogContent
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onMouseUp={(e) => e.stopPropagation()}
+                >
                     <Grid container spacing={3} className="mt-2">
                         <Grid item xs={12}>
                             <TextField
@@ -388,14 +747,47 @@ const ProfileProjects = ({ data }) => {
                                 })}
                             />
                         </Grid>
+
+                        {/* Project Images Upload */}
+                        <Grid item xs={12}>
+                            <Box onClick={(e) => e.stopPropagation()}>
+                                <ProjectImageUpload
+                                    images={newProjectImages}
+                                    onImagesChange={setNewProjectImages}
+                                    onUploadSuccess={(message) => {
+                                        console.log('Image upload success:', message) // Debug log
+                                        setSnackbar({ open: true, message, severity: 'success' })
+                                    }}
+                                    onUploadError={(message) => {
+                                        console.log('Image upload error:', message) // Debug log
+                                        setSnackbar({ open: true, message, severity: 'error' })
+                                    }}
+                                />
+                            </Box>
+                        </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setAddProjectOpen(false)}>Cancel</Button>
+                    <Button
+                        onClick={() => {
+                            console.log('Cancel button clicked') // Debug log
+                            closeAddProjectModal()
+                        }}
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         variant="contained"
-                        onClick={handleAddProject}
-                        className="bg-primary-main hover:bg-primary-dark"
+                        onClick={() => {
+                            console.log('Add Project button clicked') // Debug log
+                            handleAddProject()
+                        }}
+                        sx={{
+                            backgroundColor: 'var(--mui-palette-primary-main)',
+                            '&:hover': {
+                                backgroundColor: 'var(--mui-palette-primary-dark)'
+                            }
+                        }}
                     >
                         Add Project
                     </Button>
@@ -403,9 +795,23 @@ const ProfileProjects = ({ data }) => {
             </Dialog>
 
             {/* Edit Project Dialog */}
-            <Dialog open={editProjectOpen} onClose={() => setEditProjectOpen(false)} maxWidth="md" fullWidth>
+            <Dialog
+                open={editProjectOpen}
+                onClose={(event, reason) => {
+                    // Only allow closing via explicit user action (not backdrop click or escape)
+                    if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+                        return
+                    }
+                    setEditProjectOpen(false)
+                }}
+                maxWidth="md"
+                fullWidth
+                disableEscapeKeyDown
+                disableRestoreFocus
+                keepMounted={false}
+            >
                 <DialogTitle>Edit Project</DialogTitle>
-                <DialogContent>
+                <DialogContent onClick={(e) => e.stopPropagation()}>
                     {editingProject && (
                         <Grid container spacing={3} className="mt-2">
                             <Grid item xs={12}>
@@ -475,6 +881,24 @@ const ProfileProjects = ({ data }) => {
                                     })}
                                 />
                             </Grid>
+
+                            {/* Project Images Upload */}
+                            <Grid item xs={12}>
+                                <Box onClick={(e) => e.stopPropagation()}>
+                                    <ProjectImageUpload
+                                        images={editingProjectImages}
+                                        onImagesChange={setEditingProjectImages}
+                                        onUploadSuccess={(message) => {
+                                            console.log('Edit image upload success:', message) // Debug log
+                                            setSnackbar({ open: true, message, severity: 'success' })
+                                        }}
+                                        onUploadError={(message) => {
+                                            console.log('Edit image upload error:', message) // Debug log
+                                            setSnackbar({ open: true, message, severity: 'error' })
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
                         </Grid>
                     )}
                 </DialogContent>
@@ -483,9 +907,87 @@ const ProfileProjects = ({ data }) => {
                     <Button
                         variant="contained"
                         onClick={handleSaveEdit}
-                        className="bg-primary-main hover:bg-primary-dark"
+                        sx={{
+                            backgroundColor: 'var(--mui-palette-primary-main)',
+                            '&:hover': {
+                                backgroundColor: 'var(--mui-palette-primary-dark)'
+                            }
+                        }}
                     >
                         Save Changes
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Add External Link Dialog */}
+            <Dialog open={addLinkOpen} onClose={() => setAddLinkOpen(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>Add External Link</DialogTitle>
+                <DialogContent>
+                    <Grid container spacing={3} className="mt-2">
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Link Title"
+                                value={newLink.title}
+                                onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
+                                placeholder="e.g., Personal Website, GitHub Portfolio"
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="URL"
+                                value={newLink.url}
+                                onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
+                                placeholder="https://example.com"
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography variant="subtitle2" className="mb-2">
+                                Icon
+                            </Typography>
+                            <Box className="flex gap-2">
+                                {[
+                                    { name: 'tabler-world', label: 'Website' },
+                                    { name: 'tabler-brand-github', label: 'GitHub' },
+                                    { name: 'tabler-download', label: 'Download' },
+                                    { name: 'tabler-play', label: 'Video' },
+                                    { name: 'tabler-photo', label: 'Photo' }
+                                ].map((iconOption) => (
+                                    <Chip
+                                        key={iconOption.name}
+                                        icon={<i className={iconOption.name} />}
+                                        label={iconOption.label}
+                                        onClick={() => setNewLink({ ...newLink, icon: iconOption.name })}
+                                        variant={newLink.icon === iconOption.name ? 'filled' : 'outlined'}
+                                        sx={{
+                                            ...(newLink.icon === iconOption.name && {
+                                                backgroundColor: 'var(--mui-palette-primary-main)',
+                                                color: 'white',
+                                                '&:hover': {
+                                                    backgroundColor: 'var(--mui-palette-primary-dark)'
+                                                }
+                                            })
+                                        }}
+                                    />
+                                ))}
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setAddLinkOpen(false)}>Cancel</Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleAddLink}
+                        sx={{
+                            backgroundColor: 'var(--mui-palette-primary-main)',
+                            '&:hover': {
+                                backgroundColor: 'var(--mui-palette-primary-dark)'
+                            }
+                        }}
+                    >
+                        Add Link
                     </Button>
                 </DialogActions>
             </Dialog>

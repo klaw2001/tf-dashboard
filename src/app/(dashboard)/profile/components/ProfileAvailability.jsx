@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // MUI Imports
 import {
@@ -17,46 +17,134 @@ import {
     Select,
     MenuItem,
     Grid,
-    Chip
+    Chip,
+    Snackbar,
+    Alert,
+    CircularProgress
 } from '@mui/material'
 
+// Context Imports
+import { useTalent } from '@/contexts/TalentContext'
+
+// Map display labels to enum values
+const timezoneEnumMap = {
+    'UTC': 'UTC',
+    'GMT (UTC+0)': 'GMT',
+    'EST (UTC-5)': 'EST',
+    'PST (UTC-8)': 'PST',
+    'CST (UTC-6)': 'CST',
+    'MST (UTC-7)': 'MST',
+    'IST (UTC+5:30)': 'IST'
+}
+
+// Map enum values back to display labels
+const timezoneDisplayMap = {
+    'UTC': 'UTC',
+    'GMT': 'GMT (UTC+0)',
+    'EST': 'EST (UTC-5)',
+    'PST': 'PST (UTC-8)',
+    'CST': 'CST (UTC-6)',
+    'MST': 'MST (UTC-7)',
+    'IST': 'IST (UTC+5:30)'
+}
+
 const ProfileAvailability = ({ data }) => {
-    const [availability, setAvailability] = useState(data)
-
-    const handleTogglePreference = (preferenceId) => {
-        setAvailability({
-            ...availability,
-            preferences: availability.preferences.map(pref =>
-                pref.id === preferenceId
-                    ? { ...pref, active: !pref.active }
-                    : pref
-            )
-        })
+    // Convert backend timezone enum to display label if data exists
+    const initialData = data ? {
+        ...data,
+        ta_timezone: timezoneDisplayMap[data.ta_timezone] || 'UTC'
+    } : {
+        ta_id: null,
+        ta_full_time: false,
+        ta_full_min_salary: null,
+        ta_full_max_salary: null,
+        ta_part_time: false,
+        ta_part_min_salary: null,
+        ta_part_max_salary: null,
+        ta_consulting: false,
+        ta_consulting_min_salary: null,
+        ta_consulting_max_salary: null,
+        ta_work_location: 'Remote',
+        ta_timezone: 'UTC'
     }
 
-    const handlePreferenceChange = (preferenceId, field, value) => {
-        setAvailability({
-            ...availability,
-            preferences: availability.preferences.map(pref =>
-                pref.id === preferenceId
-                    ? { ...pref, fields: { ...pref.fields, [field]: value } }
-                    : pref
-            )
-        })
-    }
+    const [availability, setAvailability] = useState(initialData)
 
-    const handleAdditionalPreferenceChange = (field, value) => {
-        setAvailability({
-            ...availability,
-            additionalPreferences: {
-                ...availability.additionalPreferences,
-                [field]: value
+    // Snackbar state for notifications
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
+
+    // Use Talent context for saving availability
+    const { saveAvailability, loading } = useTalent()
+
+    // Update state when data changes (e.g., when fetched from backend)
+    useEffect(() => {
+        if (data) {
+            const updatedData = {
+                ...data,
+                ta_timezone: timezoneDisplayMap[data.ta_timezone] || 'UTC'
             }
+            setAvailability(updatedData)
+        }
+    }, [data])
+
+    const handleToggleWorkType = (workType) => {
+        setAvailability({
+            ...availability,
+            [workType]: !availability[workType]
         })
     }
 
-    const getPreferenceFields = (preference) => {
-        if (preference.type === 'Full-time') {
+    const handleSalaryChange = (workType, salaryType, value) => {
+        setAvailability({
+            ...availability,
+            [`${workType}_${salaryType}`]: value ? parseInt(value) : null
+        })
+    }
+
+    const handleWorkLocationChange = (value) => {
+        setAvailability({
+            ...availability,
+            ta_work_location: value
+        })
+    }
+
+    const handleTimezoneChange = (value) => {
+        setAvailability({
+            ...availability,
+            ta_timezone: value
+        })
+    }
+
+    const handleSaveAvailability = async () => {
+        try {
+            // Convert display timezone to enum value for backend
+            const availabilityForBackend = {
+                ...availability,
+                ta_timezone: timezoneEnumMap[availability.ta_timezone] || 'UTC'
+            }
+
+            const result = await saveAvailability(availabilityForBackend)
+
+            if (result.success) {
+                setSnackbar({ open: true, message: 'Availability saved successfully', severity: 'success' })
+                // Update ta_id if it's a new record
+                if (result.data && result.data.ta_id) {
+                    setAvailability(prev => ({ ...prev, ta_id: result.data.ta_id }))
+                }
+            } else {
+                setSnackbar({ open: true, message: result.error || 'Failed to save availability', severity: 'error' })
+            }
+        } catch (error) {
+            setSnackbar({ open: true, message: 'Failed to save availability', severity: 'error' })
+        }
+    }
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false })
+    }
+
+    const getWorkTypeFields = (workType) => {
+        if (workType === 'ta_full_time') {
             return (
                 <Grid container spacing={2} className="mt-4">
                     <Grid item xs={6}>
@@ -64,8 +152,8 @@ const ProfileAvailability = ({ data }) => {
                             fullWidth
                             label="Minimum Salary"
                             type="number"
-                            value={preference.fields.minSalary}
-                            onChange={(e) => handlePreferenceChange(preference.id, 'minSalary', parseInt(e.target.value))}
+                            value={availability.ta_full_min_salary || ''}
+                            onChange={(e) => handleSalaryChange('ta_full', 'min_salary', e.target.value)}
                             InputProps={{
                                 startAdornment: <Typography variant="body2" className="mr-1">$</Typography>
                             }}
@@ -76,8 +164,8 @@ const ProfileAvailability = ({ data }) => {
                             fullWidth
                             label="Maximum Salary"
                             type="number"
-                            value={preference.fields.maxSalary}
-                            onChange={(e) => handlePreferenceChange(preference.id, 'maxSalary', parseInt(e.target.value))}
+                            value={availability.ta_full_max_salary || ''}
+                            onChange={(e) => handleSalaryChange('ta_full', 'max_salary', e.target.value)}
                             InputProps={{
                                 startAdornment: <Typography variant="body2" className="mr-1">$</Typography>
                             }}
@@ -85,16 +173,16 @@ const ProfileAvailability = ({ data }) => {
                     </Grid>
                 </Grid>
             )
-        } else if (preference.type === 'Part-time') {
+        } else if (workType === 'ta_part_time') {
             return (
                 <Grid container spacing={2} className="mt-4">
                     <Grid item xs={6}>
                         <TextField
                             fullWidth
-                            label="Hourly Rate"
+                            label="Minimum Salary"
                             type="number"
-                            value={preference.fields.hourlyRate}
-                            onChange={(e) => handlePreferenceChange(preference.id, 'hourlyRate', parseInt(e.target.value))}
+                            value={availability.ta_part_min_salary || ''}
+                            onChange={(e) => handleSalaryChange('ta_part', 'min_salary', e.target.value)}
                             InputProps={{
                                 startAdornment: <Typography variant="body2" className="mr-1">$</Typography>
                             }}
@@ -103,24 +191,27 @@ const ProfileAvailability = ({ data }) => {
                     <Grid item xs={6}>
                         <TextField
                             fullWidth
-                            label="Min Hours/Week"
+                            label="Maximum Salary"
                             type="number"
-                            value={preference.fields.minHours}
-                            onChange={(e) => handlePreferenceChange(preference.id, 'minHours', parseInt(e.target.value))}
+                            value={availability.ta_part_max_salary || ''}
+                            onChange={(e) => handleSalaryChange('ta_part', 'max_salary', e.target.value)}
+                            InputProps={{
+                                startAdornment: <Typography variant="body2" className="mr-1">$</Typography>
+                            }}
                         />
                     </Grid>
                 </Grid>
             )
-        } else if (preference.type === 'Consulting') {
+        } else if (workType === 'ta_consulting') {
             return (
                 <Grid container spacing={2} className="mt-4">
                     <Grid item xs={6}>
                         <TextField
                             fullWidth
-                            label="Hourly Rate"
+                            label="Minimum Salary"
                             type="number"
-                            value={preference.fields.hourlyRate}
-                            onChange={(e) => handlePreferenceChange(preference.id, 'hourlyRate', parseInt(e.target.value))}
+                            value={availability.ta_consulting_min_salary || ''}
+                            onChange={(e) => handleSalaryChange('ta_consulting', 'min_salary', e.target.value)}
                             InputProps={{
                                 startAdornment: <Typography variant="body2" className="mr-1">$</Typography>
                             }}
@@ -129,10 +220,10 @@ const ProfileAvailability = ({ data }) => {
                     <Grid item xs={6}>
                         <TextField
                             fullWidth
-                            label="Daily Rate"
+                            label="Maximum Salary"
                             type="number"
-                            value={preference.fields.dailyRate}
-                            onChange={(e) => handlePreferenceChange(preference.id, 'dailyRate', parseInt(e.target.value))}
+                            value={availability.ta_consulting_max_salary || ''}
+                            onChange={(e) => handleSalaryChange('ta_consulting', 'max_salary', e.target.value)}
                             InputProps={{
                                 startAdornment: <Typography variant="body2" className="mr-1">$</Typography>
                             }}
@@ -147,52 +238,157 @@ const ProfileAvailability = ({ data }) => {
     return (
         <Box className="space-y-6">
             {/* Header */}
-            <Typography variant="h5" className="font-bold text-gray-900">
+            <Typography
+                variant="h5"
+                sx={{
+                    fontWeight: 'bold',
+                    color: 'var(--mui-palette-text-primary)'
+                }}
+            >
                 Availability & Rates
             </Typography>
 
-            <Typography variant="subtitle1" className="text-gray-600 mb-6">
-                Availability Preferences
+            <Typography
+                variant="subtitle1"
+                sx={{
+                    color: 'var(--mui-palette-text-secondary)',
+                    mb: 3
+                }}
+            >
+                Work Type Preferences
             </Typography>
 
             {/* Work Type Preferences */}
             <Box className="space-y-4">
-                {availability.preferences.map((preference) => (
-                    <Card key={preference.id}>
-                        <CardContent className="p-6">
-                            <Box className="flex items-center justify-between">
-                                <Box className="flex-1">
-                                    <Box className="flex items-center gap-3 mb-2">
-                                        <Typography variant="h6" className="font-semibold text-gray-900">
-                                            {preference.type}
-                                        </Typography>
-                                        <Chip
-                                            label={preference.description}
-                                            size="small"
-                                            className="bg-gray-100 text-gray-600"
-                                        />
-                                    </Box>
-
-                                    {preference.active && getPreferenceFields(preference)}
-                                </Box>
-
-                                <Box className="ml-4">
-                                    <Switch
-                                        checked={preference.active}
-                                        onChange={() => handleTogglePreference(preference.id)}
-                                        color="primary"
+                {/* Full-time */}
+                <Card>
+                    <CardContent className="p-6">
+                        <Box className="flex items-center justify-between">
+                            <Box className="flex-1">
+                                <Box className="flex items-center gap-3 mb-2">
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 600,
+                                            color: 'var(--mui-palette-text-primary)'
+                                        }}
+                                    >
+                                        Full-time
+                                    </Typography>
+                                    <Chip
+                                        label="Full-time employment"
+                                        size="small"
+                                        sx={{
+                                            backgroundColor: 'var(--mui-palette-action-hover)',
+                                            color: 'var(--mui-palette-text-secondary)'
+                                        }}
                                     />
                                 </Box>
+
+                                {availability.ta_full_time && getWorkTypeFields('ta_full_time')}
                             </Box>
-                        </CardContent>
-                    </Card>
-                ))}
+
+                            <Box className="ml-4">
+                                <Switch
+                                    checked={availability.ta_full_time}
+                                    onChange={() => handleToggleWorkType('ta_full_time')}
+                                    color="primary"
+                                />
+                            </Box>
+                        </Box>
+                    </CardContent>
+                </Card>
+
+                {/* Part-time */}
+                <Card>
+                    <CardContent className="p-6">
+                        <Box className="flex items-center justify-between">
+                            <Box className="flex-1">
+                                <Box className="flex items-center gap-3 mb-2">
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 600,
+                                            color: 'var(--mui-palette-text-primary)'
+                                        }}
+                                    >
+                                        Part-time
+                                    </Typography>
+                                    <Chip
+                                        label="Part-time employment"
+                                        size="small"
+                                        sx={{
+                                            backgroundColor: 'var(--mui-palette-action-hover)',
+                                            color: 'var(--mui-palette-text-secondary)'
+                                        }}
+                                    />
+                                </Box>
+
+                                {availability.ta_part_time && getWorkTypeFields('ta_part_time')}
+                            </Box>
+
+                            <Box className="ml-4">
+                                <Switch
+                                    checked={availability.ta_part_time}
+                                    onChange={() => handleToggleWorkType('ta_part_time')}
+                                    color="primary"
+                                />
+                            </Box>
+                        </Box>
+                    </CardContent>
+                </Card>
+
+                {/* Consulting */}
+                <Card>
+                    <CardContent className="p-6">
+                        <Box className="flex items-center justify-between">
+                            <Box className="flex-1">
+                                <Box className="flex items-center gap-3 mb-2">
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 600,
+                                            color: 'var(--mui-palette-text-primary)'
+                                        }}
+                                    >
+                                        Consulting
+                                    </Typography>
+                                    <Chip
+                                        label="Consulting projects"
+                                        size="small"
+                                        sx={{
+                                            backgroundColor: 'var(--mui-palette-action-hover)',
+                                            color: 'var(--mui-palette-text-secondary)'
+                                        }}
+                                    />
+                                </Box>
+
+                                {availability.ta_consulting && getWorkTypeFields('ta_consulting')}
+                            </Box>
+
+                            <Box className="ml-4">
+                                <Switch
+                                    checked={availability.ta_consulting}
+                                    onChange={() => handleToggleWorkType('ta_consulting')}
+                                    color="primary"
+                                />
+                            </Box>
+                        </Box>
+                    </CardContent>
+                </Card>
             </Box>
 
             {/* Additional Preferences */}
             <Card>
                 <CardContent className="p-6">
-                    <Typography variant="h6" className="font-semibold text-gray-900 mb-4">
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: 600,
+                            color: 'var(--mui-palette-text-primary)',
+                            mb: 2
+                        }}
+                    >
                         Additional Preferences
                     </Typography>
 
@@ -201,11 +397,11 @@ const ProfileAvailability = ({ data }) => {
                             <FormControl fullWidth>
                                 <InputLabel>Work Location</InputLabel>
                                 <Select
-                                    value={availability.additionalPreferences.workLocation}
-                                    onChange={(e) => handleAdditionalPreferenceChange('workLocation', e.target.value)}
+                                    value={availability.ta_work_location || 'Remote'}
+                                    onChange={(e) => handleWorkLocationChange(e.target.value)}
                                     label="Work Location"
                                 >
-                                    <MenuItem value="Remote Only">Remote Only</MenuItem>
+                                    <MenuItem value="Remote">Remote</MenuItem>
                                     <MenuItem value="Hybrid">Hybrid</MenuItem>
                                     <MenuItem value="On-site">On-site</MenuItem>
                                     <MenuItem value="Flexible">Flexible</MenuItem>
@@ -215,30 +411,13 @@ const ProfileAvailability = ({ data }) => {
 
                         <Grid item xs={12} sm={6}>
                             <FormControl fullWidth>
-                                <InputLabel>Notice Period</InputLabel>
-                                <Select
-                                    value={availability.additionalPreferences.noticePeriod}
-                                    onChange={(e) => handleAdditionalPreferenceChange('noticePeriod', e.target.value)}
-                                    label="Notice Period"
-                                >
-                                    <MenuItem value="Immediate">Immediate</MenuItem>
-                                    <MenuItem value="1 week">1 week</MenuItem>
-                                    <MenuItem value="2 weeks">2 weeks</MenuItem>
-                                    <MenuItem value="1 month">1 month</MenuItem>
-                                    <MenuItem value="2 months">2 months</MenuItem>
-                                    <MenuItem value="3 months">3 months</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid>
-
-                        <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
                                 <InputLabel>Time Zone</InputLabel>
                                 <Select
-                                    value={availability.additionalPreferences.timeZone}
-                                    onChange={(e) => handleAdditionalPreferenceChange('timeZone', e.target.value)}
+                                    value={availability.ta_timezone || 'UTC'}
+                                    onChange={(e) => handleTimezoneChange(e.target.value)}
                                     label="Time Zone"
                                 >
+                                    <MenuItem value="UTC">UTC</MenuItem>
                                     <MenuItem value="PST (UTC-8)">PST (UTC-8)</MenuItem>
                                     <MenuItem value="EST (UTC-5)">EST (UTC-5)</MenuItem>
                                     <MenuItem value="CST (UTC-6)">CST (UTC-6)</MenuItem>
@@ -249,25 +428,44 @@ const ProfileAvailability = ({ data }) => {
                                 </Select>
                             </FormControl>
                         </Grid>
-
-                        <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
-                                <InputLabel>Travel Willingness</InputLabel>
-                                <Select
-                                    value={availability.additionalPreferences.travelWillingness}
-                                    onChange={(e) => handleAdditionalPreferenceChange('travelWillingness', e.target.value)}
-                                    label="Travel Willingness"
-                                >
-                                    <MenuItem value="No Travel">No Travel</MenuItem>
-                                    <MenuItem value="Occasional Travel">Occasional Travel</MenuItem>
-                                    <MenuItem value="Frequent Travel">Frequent Travel</MenuItem>
-                                    <MenuItem value="Extensive Travel">Extensive Travel</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid>
                     </Grid>
                 </CardContent>
             </Card>
+
+            {/* Save Button */}
+            <Box className="flex justify-end pt-4">
+                <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={loading.availability ? <CircularProgress size={20} color="inherit" /> : <i className="tabler-device-floppy" />}
+                    onClick={handleSaveAvailability}
+                    disabled={loading.availability}
+                    sx={{
+                        backgroundColor: 'var(--mui-palette-primary-main)',
+                        '&:hover': {
+                            backgroundColor: 'var(--mui-palette-primary-dark)'
+                        }
+                    }}
+                >
+                    {loading.availability ? 'Saving...' : 'Save Availability'}
+                </Button>
+            </Box>
+
+            {/* Snackbar for notifications */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     )
 }

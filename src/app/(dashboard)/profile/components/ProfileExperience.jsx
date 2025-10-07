@@ -29,6 +29,9 @@ import {
 // Context Imports
 import { useTalent } from '@/contexts/TalentContext'
 
+// Component Imports
+import RichTextEditor from '@/components/RichTextEditor'
+
 // Icon Imports - Using Iconify CSS classes
 
 const ProfileExperience = ({ data }) => {
@@ -169,7 +172,17 @@ const ProfileExperience = ({ data }) => {
     // Helper function to render HTML content safely
     const renderHTML = (htmlString) => {
         if (!htmlString || htmlString === 'Data not available') {
-            return <Typography variant="body2" className="text-gray-400 italic">No description available</Typography>
+            return (
+                <Typography
+                    variant="body2"
+                    sx={{
+                        color: 'var(--mui-palette-text-disabled)',
+                        fontStyle: 'italic'
+                    }}
+                >
+                    No description available
+                </Typography>
+            )
         }
 
         // Basic HTML sanitization - in production, use a proper sanitization library
@@ -199,14 +212,25 @@ const ProfileExperience = ({ data }) => {
         <Box className="space-y-6">
             {/* Header */}
             <Box className="flex justify-between items-center">
-                <Typography variant="h5" className="font-bold text-gray-900">
+                <Typography
+                    variant="h5"
+                    sx={{
+                        fontWeight: 'bold',
+                        color: 'var(--mui-palette-text-primary)'
+                    }}
+                >
                     Work Experience
                 </Typography>
                 <Button
                     variant="contained"
                     startIcon={<i className="tabler-plus" />}
                     onClick={() => setAddExperienceOpen(true)}
-                    className="bg-primary-main hover:bg-primary-dark"
+                    sx={{
+                        backgroundColor: 'var(--mui-palette-primary-main)',
+                        '&:hover': {
+                            backgroundColor: 'var(--mui-palette-primary-dark)'
+                        }
+                    }}
                 >
                     Add Experience
                 </Button>
@@ -216,11 +240,22 @@ const ProfileExperience = ({ data }) => {
             <Box className="space-y-4">
                 {experiences.length === 0 ? (
                     <Card>
-                        <CardContent className="p-6 text-center">
-                            <Typography variant="h6" className="text-gray-500 mb-2">
+                        <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    color: 'var(--mui-palette-text-secondary)',
+                                    mb: 1
+                                }}
+                            >
                                 No experience found
                             </Typography>
-                            <Typography variant="body2" className="text-gray-400">
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'var(--mui-palette-text-disabled)'
+                                }}
+                            >
                                 Add your work experience to showcase your career
                             </Typography>
                         </CardContent>
@@ -234,27 +269,55 @@ const ProfileExperience = ({ data }) => {
                                     <Box className="flex gap-4">
                                         {/* Building Icon */}
                                         <Box className="flex-shrink-0 mt-1">
-                                            <i className="tabler-building text-gray-400" />
+                                            <i
+                                                className="tabler-building"
+                                                style={{ color: 'var(--mui-palette-text-disabled)' }}
+                                            />
                                         </Box>
 
                                         {/* Experience Content */}
                                         <Box className="flex-1">
-                                            <Typography variant="h6" className="font-semibold text-gray-900 mb-1">
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: 'var(--mui-palette-text-primary)',
+                                                    mb: 0.5
+                                                }}
+                                            >
                                                 {displayData.title}
                                             </Typography>
 
-                                            <Typography variant="subtitle1" className="text-gray-700 mb-2">
+                                            <Typography
+                                                variant="subtitle1"
+                                                sx={{
+                                                    color: 'var(--mui-palette-text-secondary)',
+                                                    mb: 1
+                                                }}
+                                            >
                                                 {displayData.company}
                                             </Typography>
 
-                                            <Typography variant="body2" className="text-gray-500 mb-4">
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: 'var(--mui-palette-text-disabled)',
+                                                    mb: 2
+                                                }}
+                                            >
                                                 {displayData.duration}, {displayData.location}
                                             </Typography>
 
                                             {/* Technologies */}
                                             {displayData.technologies.length > 0 && (
                                                 <Box className="mb-4">
-                                                    <Typography variant="body2" className="text-gray-500 mb-2">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-secondary)',
+                                                            mb: 1
+                                                        }}
+                                                    >
                                                         Technologies:
                                                     </Typography>
                                                     <Box className="flex flex-wrap gap-1">
@@ -263,7 +326,12 @@ const ProfileExperience = ({ data }) => {
                                                                 key={index}
                                                                 label={tech}
                                                                 size="small"
-                                                                className="bg-blue-100 text-blue-700 border-blue-200"
+                                                                sx={{
+                                                                    backgroundColor: 'var(--mui-palette-info-lightOpacity)',
+                                                                    color: 'var(--mui-palette-info-dark)',
+                                                                    border: '1px solid',
+                                                                    borderColor: 'var(--mui-palette-info-light)'
+                                                                }}
                                                             />
                                                         ))}
                                                     </Box>
@@ -273,7 +341,13 @@ const ProfileExperience = ({ data }) => {
                                             {/* Description/Achievements */}
                                             <Box className="mb-4">
                                                 <Box className="flex justify-between items-center mb-2">
-                                                    <Typography variant="body2" className="text-gray-500 font-medium">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-text-secondary)',
+                                                            fontWeight: 500
+                                                        }}
+                                                    >
                                                         Description & Achievements:
                                                     </Typography>
                                                     <Button
@@ -284,12 +358,24 @@ const ProfileExperience = ({ data }) => {
                                                             setTempDescription(formatHTMLForEditing(displayData.description))
                                                             setIsEditingDescription(true)
                                                         }}
-                                                        className="text-primary-main hover:text-primary-dark"
+                                                        sx={{
+                                                            color: 'var(--mui-palette-primary-main)',
+                                                            '&:hover': {
+                                                                color: 'var(--mui-palette-primary-dark)',
+                                                                backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                                            }
+                                                        }}
                                                     >
                                                         Edit
                                                     </Button>
                                                 </Box>
-                                                <Box className="bg-gray-50 p-3 rounded-lg">
+                                                <Box
+                                                    sx={{
+                                                        backgroundColor: 'var(--mui-palette-action-hover)',
+                                                        p: 1.5,
+                                                        borderRadius: 2
+                                                    }}
+                                                >
                                                     {renderHTML(displayData.description)}
                                                 </Box>
                                             </Box>
@@ -300,14 +386,26 @@ const ProfileExperience = ({ data }) => {
                                             <IconButton
                                                 size="small"
                                                 onClick={() => handleEditExperience(experience)}
-                                                className="text-primary-main hover:text-primary-dark"
+                                                sx={{
+                                                    color: 'var(--mui-palette-primary-main)',
+                                                    '&:hover': {
+                                                        color: 'var(--mui-palette-primary-dark)',
+                                                        backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                                    }
+                                                }}
                                             >
                                                 <i className="tabler-edit" />
                                             </IconButton>
                                             <IconButton
                                                 size="small"
                                                 onClick={() => handleDeleteExperience(experience.te_id)}
-                                                className="text-red-600 hover:text-red-700"
+                                                sx={{
+                                                    color: 'var(--mui-palette-error-main)',
+                                                    '&:hover': {
+                                                        color: 'var(--mui-palette-error-dark)',
+                                                        backgroundColor: 'var(--mui-palette-error-lightOpacity)'
+                                                    }
+                                                }}
                                             >
                                                 <i className="tabler-trash" />
                                             </IconButton>
@@ -379,17 +477,22 @@ const ProfileExperience = ({ data }) => {
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <Typography variant="subtitle2" className="mb-2">
+                            <Typography
+                                variant="subtitle2"
+                                sx={{
+                                    mb: 1,
+                                    fontWeight: 500,
+                                    color: 'var(--mui-palette-text-primary)'
+                                }}
+                            >
                                 Description & Achievements
                             </Typography>
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={8}
-                                placeholder="<p><strong>Role:</strong> Senior Software Engineer</p><p><strong>Key Achievements:</strong></p><ul><li>Led development of microservices architecture serving 1M+ users</li><li>Improved system performance by 40% through optimization</li><li>Mentored junior developers and established coding standards</li></ul><p><strong>Technologies:</strong> React, Node.js, AWS, Docker</p>"
+                            <RichTextEditor
                                 value={newExperience.te_description}
-                                onChange={(e) => setNewExperience({ ...newExperience, te_description: e.target.value })}
-                                helperText="You can use HTML tags for formatting: <ul><li>Item 1</li><li>Item 2</li></ul>, <strong>Bold text</strong>, <em>Italic text</em>"
+                                onChange={(html) => setNewExperience({ ...newExperience, te_description: html })}
+                                placeholder="Describe your role, key achievements, and responsibilities. Use the toolbar above to format your text with lists, bold, italic, links, and more."
+                                minHeight={200}
+                                maxHeight={300}
                             />
                         </Grid>
                     </Grid>
@@ -399,7 +502,12 @@ const ProfileExperience = ({ data }) => {
                     <Button
                         variant="contained"
                         onClick={handleAddExperience}
-                        className="bg-primary-main hover:bg-primary-dark"
+                        sx={{
+                            backgroundColor: 'var(--mui-palette-primary-main)',
+                            '&:hover': {
+                                backgroundColor: 'var(--mui-palette-primary-dark)'
+                            }
+                        }}
                     >
                         Add Experience
                     </Button>
@@ -466,17 +574,22 @@ const ProfileExperience = ({ data }) => {
                                 />
                             </Grid>
                             <Grid item xs={12}>
-                                <Typography variant="subtitle2" className="mb-2">
+                                <Typography
+                                    variant="subtitle2"
+                                    sx={{
+                                        mb: 1,
+                                        fontWeight: 500,
+                                        color: 'var(--mui-palette-text-primary)'
+                                    }}
+                                >
                                     Description & Achievements
                                 </Typography>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={8}
-                                    placeholder="<p><strong>Role:</strong> Senior Software Engineer</p><p><strong>Key Achievements:</strong></p><ul><li>Led development of microservices architecture serving 1M+ users</li><li>Improved system performance by 40% through optimization</li><li>Mentored junior developers and established coding standards</li></ul><p><strong>Technologies:</strong> React, Node.js, AWS, Docker</p>"
+                                <RichTextEditor
                                     value={editingExperience.te_description}
-                                    onChange={(e) => setEditingExperience({ ...editingExperience, te_description: e.target.value })}
-                                    helperText="You can use HTML tags for formatting: <ul><li>Item 1</li><li>Item 2</li></ul>, <strong>Bold text</strong>, <em>Italic text</em>"
+                                    onChange={(html) => setEditingExperience({ ...editingExperience, te_description: html })}
+                                    placeholder="Describe your role, key achievements, and responsibilities. Use the toolbar above to format your text with lists, bold, italic, links, and more."
+                                    minHeight={200}
+                                    maxHeight={300}
                                 />
                             </Grid>
                         </Grid>
@@ -487,7 +600,12 @@ const ProfileExperience = ({ data }) => {
                     <Button
                         variant="contained"
                         onClick={handleSaveEdit}
-                        className="bg-primary-main hover:bg-primary-dark"
+                        sx={{
+                            backgroundColor: 'var(--mui-palette-primary-main)',
+                            '&:hover': {
+                                backgroundColor: 'var(--mui-palette-primary-dark)'
+                            }
+                        }}
                     >
                         Save Changes
                     </Button>
@@ -504,11 +622,29 @@ const ProfileExperience = ({ data }) => {
                 <DialogTitle>Edit Description & Achievements</DialogTitle>
                 <DialogContent>
                     <Box className="mt-4">
-                        <Typography variant="body2" className="mb-2 text-gray-600">
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mb: 1,
+                                color: 'var(--mui-palette-text-secondary)'
+                            }}
+                        >
                             You can use HTML tags for rich formatting:
                         </Typography>
-                        <Box className="mb-4 p-3 bg-gray-50 rounded-lg">
-                            <Typography variant="caption" className="text-gray-600">
+                        <Box
+                            sx={{
+                                mb: 2,
+                                p: 1.5,
+                                backgroundColor: 'var(--mui-palette-action-hover)',
+                                borderRadius: 2
+                            }}
+                        >
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    color: 'var(--mui-palette-text-secondary)'
+                                }}
+                            >
                                 <strong>Examples:</strong><br />
                                 • <code>&lt;ul&gt;&lt;li&gt;Achievement 1&lt;/li&gt;&lt;li&gt;Achievement 2&lt;/li&gt;&lt;/ul&gt;</code><br />
                                 • <code>&lt;strong&gt;Bold text&lt;/strong&gt;</code><br />
@@ -526,11 +662,26 @@ const ProfileExperience = ({ data }) => {
                             onChange={(e) => setTempDescription(e.target.value)}
                             variant="outlined"
                         />
-                        <Box className="mt-4">
-                            <Typography variant="body2" className="mb-2 text-gray-600">
+                        <Box sx={{ mt: 2 }}>
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    mb: 1,
+                                    color: 'var(--mui-palette-text-secondary)'
+                                }}
+                            >
                                 Preview:
                             </Typography>
-                            <Box className="border border-gray-200 p-3 rounded-lg bg-gray-50 min-h-20">
+                            <Box
+                                sx={{
+                                    border: '1px solid',
+                                    borderColor: 'var(--mui-palette-divider)',
+                                    p: 1.5,
+                                    borderRadius: 2,
+                                    backgroundColor: 'var(--mui-palette-action-hover)',
+                                    minHeight: 80
+                                }}
+                            >
                                 {renderHTML(tempDescription)}
                             </Box>
                         </Box>
@@ -551,7 +702,12 @@ const ProfileExperience = ({ data }) => {
                             }
                             setIsEditingDescription(false)
                         }}
-                        className="bg-primary-main hover:bg-primary-dark"
+                        sx={{
+                            backgroundColor: 'var(--mui-palette-primary-main)',
+                            '&:hover': {
+                                backgroundColor: 'var(--mui-palette-primary-dark)'
+                            }
+                        }}
                     >
                         Save Description
                     </Button>

@@ -26,12 +26,13 @@ import {
 import ProfileOverview from './components/ProfileOverview'
 import ProfileProjects from './components/ProfileProjects'
 import ProfileExperience from './components/ProfileExperience'
-import ProfilePortfolio from './components/ProfilePortfolio'
 import ProfileAvailability from './components/ProfileAvailability'
 import ProfileReviews from './components/ProfileReviews'
 
 // Context Imports
 import { useTalent } from '@/contexts/TalentContext'
+import { useHome } from '@/contexts/HomeContext'
+import { useAuth } from '@/contexts/AuthContext'
 
 // Icon Imports - Using Iconify CSS classes
 
@@ -40,15 +41,24 @@ import { profileData } from '@/data/profileData'
 
 const ProfilePage = () => {
     const [activeSection, setActiveSection] = useState('overview')
+    const { userRole } = useHome()
+    const { user } = useAuth()
 
     // Handle URL tab parameter
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search)
         const tab = urlParams.get('tab')
-        if (tab && ['overview', 'projects', 'experience', 'portfolio', 'availability', 'reviews'].includes(tab)) {
+        if (tab && ['overview', 'projects', 'experience', 'availability', 'reviews'].includes(tab)) {
             setActiveSection(tab)
         }
     }, [])
+
+    // Redirect to recruiter profile if user is a recruiter
+    useEffect(() => {
+        if (userRole === 'recruiter') {
+            window.location.href = '/profile/recruiter'
+        }
+    }, [userRole])
 
     // Use refs to track if data has been fetched to prevent infinite loops
     const fetchedSections = useRef({
@@ -88,9 +98,8 @@ const ProfilePage = () => {
 
     const navigationItems = [
         { id: 'overview', label: 'Overview', icon: 'tabler-user' },
-        { id: 'projects', label: 'Projects', icon: 'tabler-folder' },
+        { id: 'projects', label: 'Portfolio', icon: 'tabler-photo' },
         { id: 'experience', label: 'Experience', icon: 'tabler-briefcase' },
-        { id: 'portfolio', label: 'Portfolio', icon: 'tabler-photo' },
         { id: 'availability', label: 'Availability', icon: 'tabler-calendar' },
         { id: 'reviews', label: 'Reviews', icon: 'tabler-star' }
     ]
@@ -198,10 +207,8 @@ const ProfilePage = () => {
                 return <ProfileProjects data={projects.length > 0 ? projects : []} />
             case 'experience':
                 return <ProfileExperience data={experience.length > 0 ? experience : []} />
-            case 'portfolio':
-                return <ProfilePortfolio data={profileData.portfolio} />
             case 'availability':
-                return <ProfileAvailability data={availability.length > 0 ? availability : []} />
+                return <ProfileAvailability data={availability.length > 0 ? availability[0] : null} />
             case 'reviews':
                 return <ProfileReviews data={reviews.length > 0 ? reviews : []} />
             default:
@@ -219,7 +226,13 @@ const ProfilePage = () => {
                         <Button
                             variant="text"
                             startIcon={<i className="tabler-arrow-left" />}
-                            className="text-gray-600 hover:text-primary-main"
+                            sx={{
+                                color: 'var(--mui-palette-text-secondary)',
+                                '&:hover': {
+                                    color: 'var(--mui-palette-primary-main)',
+                                    backgroundColor: 'var(--mui-palette-primary-lightOpacity)'
+                                }
+                            }}
                             onClick={() => window.history.back()}
                         >
                             Back to Dashboard
@@ -290,7 +303,12 @@ const ProfilePage = () => {
                         variant="contained"
                         fullWidth
                         startIcon={<i className="tabler-device-floppy" />}
-                        className="bg-primary-main hover:bg-primary-dark"
+                        sx={{
+                            backgroundColor: 'var(--mui-palette-primary-main)',
+                            '&:hover': {
+                                backgroundColor: 'var(--mui-palette-primary-dark)'
+                            }
+                        }}
                     >
                         Save Changes
                     </Button>

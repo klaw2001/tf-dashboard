@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { authenticatedAPI } from '@/services/api'
+import { useHome } from './HomeContext'
 
 // Talent Context
 const TalentContext = createContext({
@@ -53,6 +54,7 @@ const TalentContext = createContext({
     generateProfessionalSummary: () => { },
     saveSkills: () => { },
     uploadProfileImage: () => { },
+    uploadProjectImage: () => { },
     refreshAll: () => { }
 })
 
@@ -67,6 +69,9 @@ export const useTalent = () => {
 
 // Talent Provider Component
 export const TalentProvider = ({ children }) => {
+    // Get data from HomeContext
+    const { talentProfile, userRole } = useHome()
+
     // State for all talent data
     const [profile, setProfile] = useState(null)
     const [profilePercentage, setProfilePercentage] = useState(0)
@@ -419,6 +424,30 @@ export const TalentProvider = ({ children }) => {
         }
     }
 
+    // Upload project image
+    const uploadProjectImage = async (formData) => {
+        setLoadingState('projects', true)
+        setErrorState('projects', null)
+
+        try {
+            const response = await authenticatedAPI.upload('/talent/upload/project-image?type=project-image', formData)
+
+            if (response.success && response.data.status === 'success') {
+                return { success: true, data: response.data.data }
+            } else {
+                const error = response.data?.message || 'Failed to upload project image'
+                setErrorState('projects', error)
+                return { success: false, error }
+            }
+        } catch (error) {
+            const errorMessage = error.message || 'Failed to upload project image'
+            setErrorState('projects', errorMessage)
+            return { success: false, error: errorMessage }
+        } finally {
+            setLoadingState('projects', false)
+        }
+    }
+
     // Save skills
     const saveSkills = async (skills) => {
         setLoadingState('profile', true)
@@ -484,11 +513,25 @@ export const TalentProvider = ({ children }) => {
         ])
     }, [fetchProfile, fetchProfilePercentage, fetchProjects, fetchExperience, fetchAvailability, fetchReviews, fetchSkills])
 
-    // Auto-fetch profile and percentage on mount
+    // Sync talent profile data from HomeContext
     useEffect(() => {
-        fetchProfile()
-        fetchProfilePercentage()
-    }, [fetchProfile, fetchProfilePercentage])
+        if (talentProfile && userRole === 'talent') {
+            setProfile(talentProfile)
+            setProjects(talentProfile.t_projects || [])
+            setExperience(talentProfile.t_experience || [])
+            setAvailability(talentProfile.t_availability || [])
+            setReviews(talentProfile.t_reviews || [])
+            setSkills(talentProfile.t_skills || [])
+        }
+    }, [talentProfile, userRole])
+
+    // Auto-fetch profile and percentage on mount (only for talent users)
+    useEffect(() => {
+        if (userRole === 'talent') {
+            fetchProfile()
+            fetchProfilePercentage()
+        }
+    }, [fetchProfile, fetchProfilePercentage, userRole])
 
     const value = {
         // Data
@@ -522,6 +565,7 @@ export const TalentProvider = ({ children }) => {
         generateProfessionalSummary,
         saveSkills,
         uploadProfileImage,
+        uploadProjectImage,
         refreshAll
     }
 

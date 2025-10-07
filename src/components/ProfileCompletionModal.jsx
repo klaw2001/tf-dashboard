@@ -58,9 +58,9 @@ const ProfileCompletionModal = ({ open, onClose, profileData, profilePercentageD
     const profilePercentage = profilePercentageData?.profile_percentage || 0
 
     const getProgressColor = (percentage) => {
-        if (percentage >= 80) return '#4caf50' // Green
-        if (percentage >= 60) return '#ff9800' // Orange
-        return '#f44336' // Red
+        if (percentage >= 80) return 'var(--mui-palette-success-main)' // Success green
+        if (percentage >= 60) return 'var(--mui-palette-warning-main)' // Warning orange
+        return 'var(--mui-palette-error-main)' // Error red
     }
 
     const getStatusMessage = (percentage) => {
@@ -143,20 +143,38 @@ const ProfileCompletionModal = ({ open, onClose, profileData, profilePercentageD
             <DialogContent className="p-0">
                 <Box className="relative">
                     {/* Header */}
-                    <Box className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-t-lg">
+                    <Box
+                        sx={{
+                            background: 'linear-gradient(135deg, var(--mui-palette-primary-main) 0%, var(--mui-palette-primary-dark) 100%)',
+                            color: 'white',
+                            padding: '24px',
+                            borderRadius: '8px 8px 0 0'
+                        }}
+                    >
                         <Box className="flex justify-between items-start">
                             <Box>
                                 <Typography variant="h4" className="font-bold text-white mb-2">
                                     Complete your profile
                                 </Typography>
-                                <Typography variant="body1" className="text-green-100">
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        color: 'rgba(255, 255, 255, 0.8)',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
                                     Talents with complete, quality profiles are{' '}
                                     <span className="font-semibold text-white">4.5 times</span> more likely to get hired by clients.
                                 </Typography>
                             </Box>
                             <IconButton
                                 onClick={onClose}
-                                className="text-white hover:bg-green-700"
+                                sx={{
+                                    color: 'white',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
                                 size="small"
                             >
                                 <i className="tabler-x text-xl" />
@@ -164,7 +182,7 @@ const ProfileCompletionModal = ({ open, onClose, profileData, profilePercentageD
                         </Box>
                     </Box>
 
-                    <Box className="p-6">
+                    <Box sx={{ padding: 3 }}>
                         <Box className="flex gap-6">
                             {/* Left Side - Progress Circle */}
                             <Box className="flex flex-col items-center">
@@ -195,16 +213,37 @@ const ProfileCompletionModal = ({ open, onClose, profileData, profilePercentageD
                                         </Avatar>
                                     </Box>
                                 </Box>
-                                <Typography variant="h6" className="font-semibold text-gray-900 mt-4">
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 600,
+                                        mt: 2,
+                                        color: 'var(--mui-palette-text-primary)'
+                                    }}
+                                >
                                     {profilePercentage}% complete
                                 </Typography>
-                                <Typography variant="body2" className="text-gray-600 text-center">
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'var(--mui-palette-text-secondary)',
+                                        textAlign: 'center'
+                                    }}
+                                >
                                     {getStatusMessage(profilePercentage)}
                                 </Typography>
                                 <Button
                                     variant="text"
                                     size="small"
-                                    className="text-green-600 hover:text-green-700 mt-2"
+                                    sx={{
+                                        color: 'var(--mui-palette-primary-main)',
+                                        mt: 2,
+                                        fontSize: '0.875rem',
+                                        '&:hover': {
+                                            backgroundColor: 'var(--mui-palette-primary-lightOpacity)',
+                                            color: 'var(--mui-palette-primary-dark)'
+                                        }
+                                    }}
                                 >
                                     Learn more
                                 </Button>
@@ -212,17 +251,36 @@ const ProfileCompletionModal = ({ open, onClose, profileData, profilePercentageD
 
                             {/* Right Side - Pending Fields */}
                             <Box className="flex-1">
-                                <Typography variant="h6" className="font-semibold text-gray-900 mb-4">
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 600,
+                                        mb: 2,
+                                        color: 'var(--mui-palette-text-primary)'
+                                    }}
+                                >
                                     Complete these sections to improve your profile:
                                 </Typography>
 
                                 {pendingFields.length === 0 ? (
-                                    <Box className="text-center py-8">
-                                        <i className="tabler-check-circle text-6xl text-green-500 mb-4" />
-                                        <Typography variant="h6" className="text-green-600 font-semibold">
+                                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                                        <i
+                                            className="tabler-check-circle text-6xl mb-4"
+                                            style={{ color: 'var(--mui-palette-success-main)' }}
+                                        />
+                                        <Typography
+                                            variant="h6"
+                                            sx={{
+                                                color: 'var(--mui-palette-success-main)',
+                                                fontWeight: 600
+                                            }}
+                                        >
                                             Congratulations!
                                         </Typography>
-                                        <Typography variant="body1" className="text-gray-600">
+                                        <Typography
+                                            variant="body1"
+                                            sx={{ color: 'var(--mui-palette-text-secondary)' }}
+                                        >
                                             Your profile is 100% complete.
                                         </Typography>
                                     </Box>
@@ -231,39 +289,90 @@ const ProfileCompletionModal = ({ open, onClose, profileData, profilePercentageD
                                         {pendingFields.map((field, index) => (
                                             <ListItem
                                                 key={index}
-                                                className="cursor-pointer hover:bg-gray-50 rounded-lg p-3 border border-gray-200"
+                                                sx={{
+                                                    cursor: 'pointer',
+                                                    borderRadius: 2,
+                                                    p: 1.5,
+                                                    mb: 1,
+                                                    border: '1px solid',
+                                                    borderColor: 'var(--mui-palette-divider)',
+                                                    backgroundColor: 'var(--mui-palette-background-paper)',
+                                                    '&:hover': {
+                                                        backgroundColor: 'var(--mui-palette-action-hover)'
+                                                    }
+                                                }}
                                                 onClick={() => handleFieldClick(field)}
                                             >
-                                                <ListItemIcon className="min-w-0 mr-3">
-                                                    <Box className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                                                        <i className={`${getCategoryIcon(field.category)} text-sm text-gray-400`} />
+                                                <ListItemIcon sx={{ minWidth: 0, mr: 2 }}>
+                                                    <Box
+                                                        sx={{
+                                                            width: 24,
+                                                            height: 24,
+                                                            borderRadius: '50%',
+                                                            border: '2px solid',
+                                                            borderColor: 'var(--mui-palette-divider)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                    >
+                                                        <i
+                                                            className={`${getCategoryIcon(field.category)} text-sm`}
+                                                            style={{ color: 'var(--mui-palette-text-disabled)' }}
+                                                        />
                                                     </Box>
                                                 </ListItemIcon>
                                                 <ListItemText
                                                     primary={
                                                         <Box className="flex items-center justify-between">
-                                                            <Typography variant="subtitle1" className="font-medium">
+                                                            <Typography
+                                                                variant="subtitle1"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    color: 'var(--mui-palette-text-primary)'
+                                                                }}
+                                                            >
                                                                 {field.field_name}
                                                             </Typography>
                                                             <Chip
                                                                 label={`+${field.weight}%`}
                                                                 size="small"
-                                                                className="bg-green-100 text-green-700"
+                                                                sx={{
+                                                                    backgroundColor: 'var(--mui-palette-success-lightOpacity)',
+                                                                    color: 'var(--mui-palette-success-dark)',
+                                                                    fontWeight: 600
+                                                                }}
                                                             />
                                                         </Box>
                                                     }
                                                     secondary={
                                                         <Box>
-                                                            <Typography variant="body2" className="text-gray-600">
+                                                            <Typography
+                                                                variant="body2"
+                                                                sx={{
+                                                                    color: 'var(--mui-palette-text-secondary)',
+                                                                    mt: 0.5
+                                                                }}
+                                                            >
                                                                 {field.message}
                                                             </Typography>
-                                                            <Typography variant="caption" className="text-gray-500">
+                                                            <Typography
+                                                                variant="caption"
+                                                                sx={{
+                                                                    color: 'var(--mui-palette-text-disabled)',
+                                                                    mt: 0.5,
+                                                                    display: 'block'
+                                                                }}
+                                                            >
                                                                 {getCategoryName(field.category)}
                                                             </Typography>
                                                         </Box>
                                                     }
                                                 />
-                                                <i className="tabler-chevron-right text-gray-400" />
+                                                <i
+                                                    className="tabler-chevron-right"
+                                                    style={{ color: 'var(--mui-palette-text-disabled)' }}
+                                                />
                                             </ListItem>
                                         ))}
                                     </List>
@@ -273,20 +382,32 @@ const ProfileCompletionModal = ({ open, onClose, profileData, profilePercentageD
 
                         {/* Bottom Section */}
                         {pendingFields.length > 0 && (
-                            <Box className="mt-6 pt-4 border-t border-gray-200">
+                            <Box
+                                sx={{
+                                    mt: 3,
+                                    pt: 3,
+                                    borderTop: '1px solid',
+                                    borderColor: 'var(--mui-palette-divider)'
+                                }}
+                            >
                                 <Box className="flex items-center justify-between">
                                     <Box>
-                                        <Typography variant="body2" className="text-gray-600">
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: 'var(--mui-palette-text-secondary)'
+                                            }}
+                                        >
                                             Complete all sections to reach 100%
                                         </Typography>
                                         <LinearProgress
                                             variant="determinate"
                                             value={profilePercentage}
-                                            className="mt-2"
                                             sx={{
                                                 height: 8,
                                                 borderRadius: 4,
-                                                backgroundColor: 'gray.200',
+                                                mt: 1,
+                                                backgroundColor: 'var(--mui-palette-action-disabledBackground)',
                                                 '& .MuiLinearProgress-bar': {
                                                     backgroundColor: getProgressColor(profilePercentage),
                                                     borderRadius: 4
@@ -296,7 +417,17 @@ const ProfileCompletionModal = ({ open, onClose, profileData, profilePercentageD
                                     </Box>
                                     <Button
                                         variant="contained"
-                                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2"
+                                        sx={{
+                                            backgroundColor: 'var(--mui-palette-primary-main)',
+                                            color: 'white',
+                                            px: 3,
+                                            py: 1.5,
+                                            fontWeight: 600,
+                                            borderRadius: 2,
+                                            '&:hover': {
+                                                backgroundColor: 'var(--mui-palette-primary-dark)',
+                                            }
+                                        }}
                                         onClick={() => {
                                             onClose()
                                             window.location.href = '/profile'
